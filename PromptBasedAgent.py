@@ -2,8 +2,8 @@ import os
 import datetime
 from langchain_core.messages import AnyMessage
 from langchain_core.runnables import RunnableConfig
-from langgraph.prebuilt import create_react_agent
-from langgraph.prebuilt.chat_agent_executor import AgentState
+from langchain.agents import create_agent
+from langchain.agents import AgentState
 
 
 PROMPT_NAME = "agent.prompt"
@@ -21,14 +21,14 @@ def _load_system_prompt() -> str:
 
 base_system_prompt = _load_system_prompt()   
 
-
+'''
 def prompt(state: AgentState, config: RunnableConfig) -> list[AnyMessage]:  
     system_msg = base_system_prompt
     return [{"role": "system", "content": system_msg}] + state["messages"]
+'''
 
-
-graph = create_react_agent(
+graph = create_agent(
     model=f"openai:{OPENAI_MODEL}",
     tools=[get_current_date],
-    prompt=prompt
+    system_prompt=base_system_prompt # was prompt now works
 )
