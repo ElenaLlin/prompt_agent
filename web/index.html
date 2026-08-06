@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prompt-Based Agent</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+
+<div class="app-shell">
+    <aside class="sidebar">
+    <h1>Prompt-Based Agent</h1>
+    <p>A lightweight Flask UI for AI Futures assistant.</p>
+    <div class="thread-box">Thread ID: <strong>{{ thread_id }}</strong></div>
+    </aside>
+
+    <main class="chat-panel">
+    <div class="messages">
+        {% if chat_history %}
+        {% for message in chat_history %}
+            <div class="message {{ message.role }}">
+            <div class="bubble">
+                {{ message.content }}
+            </div>
+            </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <p>Start a conversation with your agent.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <form method="post" action="{{ url_for('chat') }}" class="composer">
+        <input
+        type="text"
+        name="message"
+        placeholder="Type your message…"
+        autocomplete="off"
+        required
+        />
+        <button type="submit">Send</button>
+    </form>
+    </main>
+</div>
+
+</html>
