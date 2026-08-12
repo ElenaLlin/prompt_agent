@@ -7,6 +7,11 @@
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
 
 <div class="app-shell">
+<!--     <header class="scenario">
+        <h1 class="usecase"></h1>
+        <p class=""></p>
+    </header> -->
+
     <aside class="sidebar">
     <h1>Prompt-Based Agent</h1>
     <p>A lightweight Flask UI for AI Futures assistant.</p>
@@ -39,6 +44,10 @@
         required
         />
         <button type="submit">Send</button>
+    </form>
+
+    <form method="post" action="{{ url_for('clear_chat') }}" class="clear-chat">
+        <button type="submit">Clear chat</button>
     </form>
     </main>
 </div>
