@@ -1,118 +1,127 @@
-"""
-Goal Reflection Agent — Streamlit Community Cloud entry point.
-
-Env vars are loaded from (in priority order):
-  1. Streamlit secrets  (st.secrets)
-  2. .env file          (python-dotenv)
-  3. Real environment variables
-"""
-
-import os
+import os 
 import uuid
-import streamlit as st
+import json
+from flask import Flask, redirect, render_template, request, send_from_directory, session, url_for
+from supabase import create_client, Client
+from dotenv import load_dotenv
 
-# ── 0. Page config — must be the very first Streamlit call ───────────────────
-st.set_page_config(page_title="Prompt-based Agent", page_icon="🎯")
+from backend.agent_service import generate_reply, make_thread_id, warmup_agent
 
-# ── 1. Load configuration before importing the agent ────────────────────────
+load_dotenv()
 
-def _bootstrap_env() -> None:
-    """Populate os.environ from Streamlit secrets or .env, whichever is present."""
-    # Streamlit secrets (flat keys only – nested tables are ignored here)
-    try:
-        for key, value in st.secrets.items():
-            if isinstance(value, str) and key not in os.environ:
-                os.environ[key] = value
-    except Exception:
-        pass
+app = Flask(__name__, template_folder="web", static_folder="web")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.environ.get(
+    "OPENAI_API_KEY", "dev-secret-key"
+    ))
 
-    # .env file (local development)
-    try:
-        from dotenv import load_dotenv
-        load_dotenv(override=False)   # don't override what Streamlit already set
-    except ImportError:
-        pass
+supabase: Client = create_client(
+    os.environ.get("SUPABASE_URL"),
+    os.environ.get("SUPABASE_KEY")
+)
 
+# Initialize the agent once when the app starts.
+warmup_agent()
+study = "example" # number or area goes here
+study_path = os.path.join(os.path.dirname(__file__), f"study_{study}.json")
+with open(study_path, "r", encoding="utf-8") as f:
+    study_config = json.load(f)
 
-_bootstrap_env()
+selection_path = os.path.join(os.path.dirname(__file__), "choices.json")
+with open(selection_path, "r", encoding="utf-8") as f:
+    selection = json.load(f)
 
-# ── 2. Import agent (env vars must be set first) ─────────────────────────────
+# User id for example
+userId = "hay1-flour2"
+supabase.table("answers").update(selection).eq("user_id",userId).execute()
 
-from PromptBasedAgent import graph  # noqa: E402
-from langchain_core.messages import HumanMessage, AIMessage  # noqa: E402
-
-# ── 3. Helpers ────────────────────────────────────────────────────────────────
-
-def make_thread_id(seed: str) -> str:
-    """Return a deterministic UUID5 from *seed* (session key)."""
-    return str(uuid.uuid5(uuid.NAMESPACE_DNS, seed))
-
-
-def run_graph(messages: list, thread_id: str) -> str:
-    """Invoke the LangGraph agent and return the last AI message content."""
-    config = {
-        "configurable": {
-            "thread_id": thread_id,
-        }
-    }
-    result = graph.invoke({"messages": messages}, config=config)
-    last = result["messages"][-1]
-    # Handle both AIMessage objects and plain dicts
-    if hasattr(last, "content"):
-        return last.content
-    return str(last.get("content", last))
+Data = supabase.table('answers').select(
+    "user_id",
+    "agent_language",
+    "usecase",
+    "scenario",
+    "initial",
+    "context",
+    "final"
+    ).eq("user_id",userId).execute()
+userData = Data.data[0]
+print(userData)
+# make choices the first message from user
+userMessage = userData["usecase"] + '\n' + userData["scenario"]
+# make machine have first output message - will be generated when a session starts
 
 
-# ── 4. Streamlit UI ───────────────────────────────────────────────────────────
+def chat_init():
+    '''
+    Initialises conversation state
+    '''
+    # Ensure session seed exists before generating an initial assistant message
+    if "session_seed" not in session:
+        session["session_seed"] = str(uuid.uuid4())
 
-st.title("Prompt Based Agent")
+    thread_id = make_thread_id(session["session_seed"])
 
-# ── Session seed (stable per browser session) ────────────────────────────────
-if "session_seed" not in st.session_state:
-    st.session_state.session_seed = str(uuid.uuid4())
-
-thread_id = make_thread_id(st.session_state.session_seed)
-
-# ── Sidebar: thread info + clear ─────────────────────────────────────────────
-with st.sidebar:
-    st.caption(f"Thread ID: `{thread_id}`")
-    if st.button("🗑️ Clear conversation"):
-        st.session_state.chat_history = []
-        st.rerun()
-
-# ── Conversation state ────────────────────────────────────────────────────────
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []   # list of {"role": ..., "content": ...}
-
-# ── Render existing messages ──────────────────────────────────────────────────
-for msg in st.session_state.chat_history:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
-# ── New user input ────────────────────────────────────────────────────────────
-user_input = st.chat_input("Type your message…")
-
-if user_input:
-    # Show and store user message
-    with st.chat_message("user"):
-        st.markdown(user_input)
-    st.session_state.chat_history.append({"role": "user", "content": user_input})
-
-    # Build LangChain message list for the graph
-    lc_messages = []
-    for m in st.session_state.chat_history:
-        if m["role"] == "user":
-            lc_messages.append(HumanMessage(content=m["content"]))
+    if "chat_history" not in session:
+        # Ask the agent to produce the first message (assistant-initiated)
+        initial_text, initial_json = generate_reply([], thread_id)
+        # If parsed JSON returned, save it in session and show only the thank-you text
+        if isinstance(initial_text, str) and initial_text.startswith("⚠️ Error"):
+            # Error: fall back to previous behavior
+            session["chat_history"] = [{"role": "user", "content": userMessage}]
+            history = session["chat_history"]
+            initial_text, initial_json = generate_reply(history, thread_id)
         else:
-            lc_messages.append(AIMessage(content=m["content"]))
+            if initial_json is not None:
+                session["responses_summary"] = initial_json
+            session["chat_history"] = [{"role": "assistant", "content": initial_text}]
 
-    # Invoke graph
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking…"):
-            try:
-                response = run_graph(lc_messages, thread_id)
-            except Exception as exc:
-                response = f"⚠️ Error: {exc}"
-        st.markdown(response)
+    return thread_id
 
-    st.session_state.chat_history.append({"role": "assistant", "content": response})
+@app.route(f"/study_{study}", methods=["GET", "POST"])
+def chat():
+
+    thread_id = chat_init()
+
+    # ── Render existing messages ──────────────────────────────────────────────────
+    if request.method == "POST":
+        # New user input
+        message = (request.form.get("message") or "").strip()
+        if message:
+            # Show and store user and agent message
+            history = session["chat_history"]
+            history.append({"role": "user", "content": message})
+            # Invoke graph
+            response_text, response_json = generate_reply(history, thread_id)
+            # If the agent returned structured JSON, store it separately instead of showing raw JSON
+            if response_json is not None:
+                session["responses_summary"] = response_json
+                supabase.table("answers").update(
+                    {"chatbot_summary": response_json}
+                    ).eq("user_id", userId).execute()
+            if response_text:
+                display_text = response_text
+            else:
+                display_text = ""
+            history.append({"role": "assistant", "content": display_text})
+            session["chat_history"] = history
+
+    return render_template(
+        "index.html",
+        chat_history=session["chat_history"],
+        thread_id=thread_id,
+    )
+
+@app.route("/clear", methods=["POST"])
+def clear_chat():
+    chat_init()
+    session.pop("chat_history", None)
+    session.pop("session_seed", None)
+    session.pop("responses_summary", None)
+    return redirect(url_for("chat"))
+
+
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(app.static_folder, "favicon.ico", mimetype="image/vnd.microsoft.icon")
+
+if __name__ == "__main__":
+    app.run(debug=True, use_reloader=False)
