@@ -6,19 +6,198 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
 
-<div class="app-shell">
-<!--     <header class="scenario">
-        <h1 class="usecase"></h1>
-        <p class=""></p>
-    </header> -->
 
-    <aside class="sidebar">
-    <h1>Prompt-Based Agent</h1>
-    <p>A lightweight Flask UI for AI Futures assistant.</p>
-    <div class="thread-box">Thread ID: <strong>{{ thread_id }}</strong></div>
-    </aside>
+<header class="brand">
+<div class="progress" id="progress">
+    Welcome · Community Design Lab
+</div>
+</header>
 
-    <main class="chat-panel">
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-copy">
+        <div class="eyebrow">A city designed with you</div>
+
+        <h1>
+        Help us design {{future_city}}.
+        </h1>
+
+        <p class="lede">
+        A city designed around the needs and values of {{study_group}}
+        in the {{counrty}}. You are invited to help imagine what
+        healthcare could become in the future for your community.
+        </p>
+    </div>
+
+    <div class="hero-art">
+        <!-- Replace this with your Marigold Cross city image -->
+        <img
+        src="{{ study }}/city.jpg"
+        alt="Futuristic {{ future_city }} city"
+        />
+    </div>
+</section>
+
+<main class="shell">
+    <!-- PARTICIPANT ENTRY -->
+    <section class="panel" id="entry">
+    <div class="entry-form">
+        <div class="center">
+        <h2>Welcome to {{ future_city }}</h2>
+        <p>
+            Before we begin, tell us a little about yourself.
+            Your responses will help shape the future city.
+        </p>
+        </div>
+
+        <div class="field-row">
+        <div>
+            <label for="nameInput">Your name</label>
+            <input id="nameInput" type="text" placeholder="Enter your name" />
+        </div>
+
+        <div>
+            <label for="ageInput">Age</label>
+            <input id="ageInput" type="number" placeholder="Enter your age" />
+        </div>
+        </div>
+
+        <label>Gender</label>
+        <div class="pill-group" id="genderGroup">
+        <button class="pill" data-value="Woman">Woman</button>
+        <button class="pill" data-value="Man">Man</button>
+        <button class="pill" data-value="Non-binary">Non-binary</button>
+        <button class="pill" data-value="Prefer not to say">
+            Prefer not to say
+        </button>
+        </div>
+
+        <label>South Asian community</label>
+        <div class="pill-group" id="heritageGroup">
+        <!-- From study.json -->
+        <button class="pill" data-value="Indian">Indian</button>
+        <button class="pill" data-value="Pakistani">Pakistani</button>
+        <button class="pill" data-value="Bangladeshi">Bangladeshi</button>
+        <button class="pill" data-value="Sri Lankan">Sri Lankan</button>
+        <button class="pill" data-value="Nepali">Nepali</button>
+        <!-- Default -->
+        <button class="pill" data-value="Other">Other</button>
+        <button class="pill" data-value="Prefer not to say">
+            Prefer not to say
+        </button>
+        </div>
+
+        <button class="primary" id="enterBtn">
+        Start designing {{ future_city }}
+        </button>
+
+        <div class="status" id="status">Not started</div>
+    </div>
+    </section>
+
+    <!-- USE CASES -->
+    <section class="panel hidden" id="cases">
+    <div class="center">
+        <h2>Choose a use case</h2>
+        <p>
+        Explore different ways healthcare technology could support
+        everyday life in {{ future_city }}.
+        </p>
+    </div>
+
+    <div class="case-grid">
+
+        <button class="case" data-case="self"> <!-- edit -->
+        <img
+            src="{{ study }}/usecase-one.jpg"
+            alt="Taking care of yourself from diabetes"
+        />
+
+        <div class="case-body">
+            <span class="tag">Use case one</span>
+            <h3>{{ usecase_one }}</h3>
+            <p class="imagine">
+            {{ description_one }}
+            </p>
+        </div>
+        </button>
+
+        <button class="case" data-case="elder"> <!-- edit -->
+        <img
+            src="{{ study }}/usecase-two.jpg"
+            alt="Supporting an older adult"
+        />
+
+        <div class="case-body">
+            <span class="tag">Use case two</span>
+            <h3>{{ usecase_two }}</h3>
+            <p class="imagine">
+            {{ description_two }}
+            </p>
+        </div>
+        </button>
+
+    </div>
+    </section>
+
+    <!-- SCENARIOS -->
+    <section class="panel hidden" id="scenarios">
+    <div class="back-row">
+        <button class="secondary" id="backCases">
+        ← Back
+        </button>
+    </div>
+
+    <div class="center">
+        <h2 id="scenarioTitle"></h2>
+        <p id="scenarioCopy"></p>
+    </div>
+
+    <div class="scenario-grid" id="scenarioGrid"></div>
+    </section>
+
+    <!-- CONVERSATION -->
+    <section class="panel hidden" id="chatSection">
+    <div class="back-row">
+        <button class="secondary" id="backScenarios">
+        ← Back
+        </button>
+    </div>
+
+    <div class="chat">
+
+        <div>
+        <div class="context-image">
+            <img id="contextImg" src="" alt="Selected scenario" />
+        </div>
+
+        <span class="tag" id="chatLens"></span>
+
+        <h2 id="chatTitle"></h2>
+
+        <p id="chosenDesc"></p>
+        </div>
+
+        <div>
+        <div class="chat-log" id="chatLog"></div>
+
+        <div class="chat-input">
+            <textarea
+            id="input"
+            placeholder="Share your thoughts..."
+            rows="2"
+            ></textarea>
+
+            <button class="primary" id="sendBtn">
+            Send
+            </button>
+        </div>
+        </div>
+
+    </div>
+    </section>
+
+    <section class="chat-panel hidden">
     <div class="messages">
         {% if chat_history %}
         {% for message in chat_history %}
@@ -49,7 +228,18 @@
     <form method="post" action="{{ url_for('clear_chat') }}" class="clear-chat">
         <button type="submit">Reset chat</button>
     </form>
-    </main>
-</div>
+
+    <aside class="sidebar">
+    <h1>Prompt-Based Agent</h1>
+    <p>A lightweight Flask UI for AI Futures assistant.</p>
+    <div class="thread-box">Thread ID: <strong>{{ thread_id }}</strong></div>
+    </aside>
+
+    </section>
+</main>
+
+<footer>
+{{ future_city }} · Community Design Lab
+</footer>
 
 </html>
