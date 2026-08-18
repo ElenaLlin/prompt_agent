@@ -27,6 +27,14 @@ html {
   scroll-behavior: smooth;
 }
 
+select {
+  background-color: var(--card);
+}
+
+input {
+    background-color: var(--card);
+}
+
 header {
   height: auto;
   left: 0px;
@@ -41,6 +49,7 @@ header {
 
 main {
   position: relative;
+  left: auto;
 }
 
 body {
@@ -65,19 +74,27 @@ footer {
   font-size: 0.85rem;
   padding-top: 25px;
   height: 50px;
+  margin-top: auto;
 }
 
 .shell {
   display: grid;
+  gap: 20px;
   width: min(1400px, 94vw);
   margin: 0 auto;
   padding: 28px 0 0;
-  position: relative;
+}
+
+/* Index.html - main has single full-width section inside */
+.shell .panel {
+  grid-column: 1 / -1;
 }
 
 .sidebar {
   padding: 24px;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  left:0%;
+  width: 100%; 
 }
 
 .sidebar h1 {
@@ -93,12 +110,12 @@ footer {
   font-size: 0.95rem;
 }
 
-.chat-panel {
+/* .chat-panel {
   display: flex;
   flex-direction: column;
   padding: 24px;
   gap: 16px;
-}
+} */
 
 .messages {
   flex: 1;
@@ -127,12 +144,12 @@ footer {
 
 .message.user .bubble {
   background: whitesmoke;
-  color: black;
+  color: var(--gold);
 }
 
 .message.assistant .bubble {
-  background: black;
-  color: whitesmoke
+  background: var(--gold-light);
+  color: black
 }
 
 .empty-state {
@@ -147,6 +164,7 @@ footer {
   display: flex;
   gap: 10px;
   padding-top: 8px;
+  margin-top: 1em;
 }
 
 .composer input {
@@ -166,6 +184,17 @@ footer {
   color: white;
   cursor: pointer;
 }
+
+.clear-chat button {
+  padding: 0 16px;
+  margin-top: 1em;
+  border: none;
+  border-radius: 999px;
+  color: var(--paper);
+  background-color: var(--dark);
+  cursor: pointer;
+}
+
 
 
 button,

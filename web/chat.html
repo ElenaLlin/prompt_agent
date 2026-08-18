@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prompt-Based Agent</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+
+
+<header class="brand">
+<div class="progress" id="progress">
+    Welcome · Community Design Lab
+</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-copy">
+        <div class="eyebrow">A city designed with you</div>
+
+        <h1>
+        Help us design {{future_city}}.
+        </h1>
+
+        <p class="lede">
+        A city designed around the needs and values of {{study_group}}
+        in the {{counrty}}. You are invited to help imagine what
+        healthcare could become in the future for your community.
+        </p>
+    </div>
+
+    <div class="hero-art">
+        <!-- Replace this with your Marigold Cross city image -->
+        <img
+        src="{{ study }}/city.jpg"
+        alt="Futuristic {{ future_city }} city"
+        />
+    </div>
+</section>
+
+<main class="shell">
+
+    <div class="sidebar">
+    <h1>AI Futures assistant.</h1>
+    <p>{{ usecase }}</p>
+    <div class="thread-box">Thread ID: <strong>{{ thread_id }}</strong></div>
+    <p> {{ scenario }}</p>
+    </div>
+
+    <section class="panel">
+    <div class="messages">
+        {% if chat_history %}
+        {% for message in chat_history %}
+            <div class="message {{ message.role }}">
+            <div class="bubble">
+                {{ message.content }}
+            </div>
+            </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <p>Start a conversation with your agent.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <form method="post" action="{{ url_for('chat') }}" class="composer">
+        <input
+        type="text"
+        name="message"
+        placeholder="Type your message…"
+        autocomplete="off"
+        required
+        />
+        <button type="submit">Send</button>
+    </form>
+
+    <form method="post" action="{{ url_for('clear_chat') }}" class="clear-chat">
+        <button type="submit">Reset chat</button>
+    </form>
+    </section>
+
+    
+</main>
+
+
+
+<footer>
+{{ future_city }} · Community Design Lab
+</footer>
+
+</html>

@@ -40,7 +40,7 @@
 
 <main class="shell">
     <!-- PARTICIPANT ENTRY -->
-    <section class="panel" id="entry">
+    <section class={{entry_status}} id="entry">
     <div class="entry-form">
         <div class="center">
         <h2>Welcome to {{ future_city }}</h2>
@@ -49,54 +49,62 @@
             Your responses will help shape the future city.
         </p>
         </div>
-
+       
+        <form method="post" action="{{ url_for('survey', view='usecases')  }}"> 
         <div class="field-row">
-        <div>
+            <!-- edit entry in .py -->
             <label for="nameInput">Your name</label>
             <input id="nameInput" type="text" placeholder="Enter your name" />
-        </div>
-
-        <div>
+        
             <label for="ageInput">Age</label>
             <input id="ageInput" type="number" placeholder="Enter your age" />
         </div>
-        </div>
 
         <label>Gender</label>
-        <div class="pill-group" id="genderGroup">
-        <button class="pill" data-value="Woman">Woman</button>
-        <button class="pill" data-value="Man">Man</button>
-        <button class="pill" data-value="Non-binary">Non-binary</button>
-        <button class="pill" data-value="Prefer not to say">
-            Prefer not to say
-        </button>
+        <div class="pill-group">
+        <select id="genderGroup">
+        <option class="pill" data-value="Woman">Woman</option>
+        <option class="pill" data-value="Man">Man</option>
+        <option class="pill" data-value="Non-binary">Non-binary</option>
+        <option class="pill" data-value="Prefer not to say">
+            Prefer not to say 
+        </option>
+        </select>
         </div>
 
         <label>South Asian community</label>
         <div class="pill-group" id="heritageGroup">
         <!-- From study.json -->
-        <button class="pill" data-value="Indian">Indian</button>
+        <select>
+        {% if communities %}
+        {% for item in communities %}
+            <option class="pill" data-value="{{ item.content }}">{{ item.content }}</option>
+        {% endfor %}
+        {% endif %}
+        <!-- <button class="pill" data-value="Indian">Indian</button>
         <button class="pill" data-value="Pakistani">Pakistani</button>
         <button class="pill" data-value="Bangladeshi">Bangladeshi</button>
         <button class="pill" data-value="Sri Lankan">Sri Lankan</button>
-        <button class="pill" data-value="Nepali">Nepali</button>
+        <button class="pill" data-value="Nepali">Nepali</button> -->
         <!-- Default -->
-        <button class="pill" data-value="Other">Other</button>
-        <button class="pill" data-value="Prefer not to say">
+        <option class="pill" data-value="Other">Other</option>
+        <option class="pill" data-value="Prefer not to say">
             Prefer not to say
-        </button>
+        </option>
+        </select>
         </div>
 
-        <button class="primary" id="enterBtn">
+        <button class="primary" id="enterBtn" type="sumbit">
         Start designing {{ future_city }}
         </button>
 
+        </form>
         <div class="status" id="status">Not started</div>
     </div>
     </section>
 
     <!-- USE CASES -->
-    <section class="panel hidden" id="cases">
+    <section class={{usecase_status}} id="cases">
     <div class="center">
         <h2>Choose a use case</h2>
         <p>
@@ -107,13 +115,14 @@
 
     <div class="case-grid">
 
-        <button class="case" data-case="self"> <!-- edit -->
+        <form method="post" action="{{ url_for('survey', view='scenario') }}">
+        <button class="case" data-case="self" type="sumbit"> <!-- edit -->
         <img
             src="{{ study }}/usecase-one.jpg"
             alt="Taking care of yourself from diabetes"
         />
 
-        <div class="case-body">
+        <div class="case-body" >
             <span class="tag">Use case one</span>
             <h3>{{ usecase_one }}</h3>
             <p class="imagine">
@@ -122,7 +131,7 @@
         </div>
         </button>
 
-        <button class="case" data-case="elder"> <!-- edit -->
+        <button class="case" data-case="elder" type="sumbit"> <!-- edit -->
         <img
             src="{{ study }}/usecase-two.jpg"
             alt="Supporting an older adult"
@@ -137,23 +146,61 @@
         </div>
         </button>
 
+        </form>
+
     </div>
     </section>
 
     <!-- SCENARIOS -->
-    <section class="panel hidden" id="scenarios">
+    <section class={{scenario_status}} id="scenarios">
+    
+    <form method="post" action="{{ url_for('survey', view='usecases')  }}"> 
     <div class="back-row">
         <button class="secondary" id="backCases">
         ← Back
         </button>
     </div>
+    </form>
 
     <div class="center">
-        <h2 id="scenarioTitle"></h2>
+        <h2 id="scenarioTitle">{{scenario_title}}</h2>
         <p id="scenarioCopy"></p>
     </div>
 
-    <div class="scenario-grid" id="scenarioGrid"></div>
+    <div class="scenario-grid" id="scenarioGrid">
+        <form method="post" action="{{ url_for('chat') }}">
+        <button class="scenario" data-scenario="one" type="sumbit">
+        <img
+            src="{{ study }}/scenario-one.jpg"
+            alt="Taking care of yourself from diabetes"
+        />
+
+        <div class="case-body" >
+            <span class="tag">Use case one</span>
+            <h3>{{ scenario_two }}</h3>
+            <p class="imagine">
+            {{ description_one }}
+            </p>
+        </div>
+        </button>
+
+        <button class="scenario" data-scenario="two" type="sumbit">
+        <img
+            src="{{ study }}/scenario-two.jpg"
+            alt="Supporting an older adult"
+        />
+
+        <div class="case-body">
+            <span class="tag">Use case two</span>
+            <h3>{{ scenario_two }}</h3>
+            <p class="imagine">
+            {{ description_two }}
+            </p>
+        </div>
+        </button>
+
+        </form>
+    </div>
     </section>
 
     <!-- CONVERSATION -->
@@ -197,45 +244,6 @@
     </div>
     </section>
 
-    <section class="chat-panel hidden">
-    <div class="messages">
-        {% if chat_history %}
-        {% for message in chat_history %}
-            <div class="message {{ message.role }}">
-            <div class="bubble">
-                {{ message.content }}
-            </div>
-            </div>
-        {% endfor %}
-        {% else %}
-        <div class="empty-state">
-            <p>Start a conversation with your agent.</p>
-        </div>
-        {% endif %}
-    </div>
-
-    <form method="post" action="{{ url_for('chat') }}" class="composer">
-        <input
-        type="text"
-        name="message"
-        placeholder="Type your message…"
-        autocomplete="off"
-        required
-        />
-        <button type="submit">Send</button>
-    </form>
-
-    <form method="post" action="{{ url_for('clear_chat') }}" class="clear-chat">
-        <button type="submit">Reset chat</button>
-    </form>
-
-    <aside class="sidebar">
-    <h1>Prompt-Based Agent</h1>
-    <p>A lightweight Flask UI for AI Futures assistant.</p>
-    <div class="thread-box">Thread ID: <strong>{{ thread_id }}</strong></div>
-    </aside>
-
-    </section>
 </main>
 
 <footer>

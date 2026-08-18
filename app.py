@@ -23,11 +23,11 @@ supabase: Client = create_client(
 warmup_agent()
 
 study = "south_asia" # study goes here - how will this be set? home page?
-study_path = os.path.join(os.path.dirname(__file__), f"study_{study}/study_{study}.json")
+study_path = os.path.join(os.path.dirname(__file__), f"study_{study}\\study_{study}.json")
 with open(study_path, "r", encoding="utf-8") as f:
     study_config = json.load(f)
 
-selection_path = os.path.join(os.path.dirname(__file__), f"study_{study}/choices.json")
+selection_path = os.path.join(os.path.dirname(__file__), "choices.json")
 with open(selection_path, "r", encoding="utf-8") as f:
     selection = json.load(f)
 
@@ -36,6 +36,7 @@ userId = study_config["user_id_list"][0] # will be inputed by user
 group = study_config["group"]
 city = study_config["future_city"]
 country = study_config["country"]
+communities = study_config["communities"]
 
 supabase.table("answers").update(selection).eq("user_id",userId).execute()
 
@@ -52,8 +53,11 @@ userData = Data.data[0]
 print(userData)
 # make choices the first message from user
 userMessage = userData["usecase"] + '\n' + userData["scenario"]
+scenario = userData["scenario"]
+usecase = userData["usecase"]
 # make machine have first output message - will be generated when a session starts
-
+hide = "panel hidden"
+view = "panel"
 
 def chat_init():
     '''
@@ -82,7 +86,26 @@ def chat_init():
     return thread_id
 
 @app.route(f"/study_{study}", methods=["GET", "POST"])
-def chat(): 
+def survey():
+    current_view = request.args.get("view", "entry")
+
+    entry_status = view if current_view == "entry" else hide
+    usecase_status = view if current_view == "usecases" else hide
+    scenario_status = view if current_view == "scenario" else hide
+
+    return render_template(
+        "index.html",
+        study = study,
+        study_group = group,
+        future_city = city,
+        country = country,
+        entry_status = entry_status,
+        usecase_status = usecase_status,
+        scenario_status = scenario_status
+    )
+
+@app.route(f"/study_{study}/chat", methods=["GET", "POST"])
+def chat():
     """ needs to correspond to html """
 
     thread_id = chat_init()
@@ -111,13 +134,16 @@ def chat():
             session["chat_history"] = history
 
     return render_template(
-        "index.html",
+        "chat.html",
         chat_history=session["chat_history"],
         thread_id=thread_id,
         study = study,
         study_group = group,
         future_city = city,
-        country = country
+        country = country,
+        scenario = scenario,
+        usecase = usecase,
+        communities = communities
     )
 
 @app.route("/clear", methods=["POST"])
