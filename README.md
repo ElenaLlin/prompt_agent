@@ -33,22 +33,8 @@ cp .env.example .env
 # Edit .env — add at minimum OPENAI_API_KEY
 
 # 3. Run
-streamlit run app.py
+flask --app app.py --debug run
 ```
-
----
-
-## Streamlit Community Cloud
-
-1. Push this repo to GitHub.
-2. Go to [share.streamlit.io](https://share.streamlit.io) → **New app** → select `app.py`.
-3. Open **App settings → Secrets** and paste:
-
-```toml
-OPENAI_API_KEY = "sk-..."
-```
-
-The app reads `st.secrets` first, then falls back to `.env`.
 
 ---
 
@@ -57,3 +43,5 @@ The app reads `st.secrets` first, then falls back to `.env`.
 | Variable | Required | Description |
 |---|---|---|
 | `OPENAI_API_KEY` | ✅ | OpenAI API key |
+| `SUPABASE_URL` | ✅ | Supabase URL |
+| `SUPABASE_KEY` | ✅ | Supabase URL |
