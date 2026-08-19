@@ -23,7 +23,7 @@ supabase: Client = create_client(
 warmup_agent()
 
 study = "south_asia" # study goes here - how will this be set? home page?
-study_path = os.path.join(os.path.dirname(__file__), f"study_{study}\\study_{study}.json")
+study_path = os.path.join(os.path.dirname(__file__), f"study_{study}/study_{study}.json")
 with open(study_path, "r", encoding="utf-8") as f:
     study_config = json.load(f)
 
