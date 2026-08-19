@@ -59,6 +59,19 @@ usecase = userData["usecase"]
 hide = "panel hidden"
 view = "panel"
 
+@app.route("/", methods=["GET"])
+def default():
+    return render_template(
+        "index.html",
+        study = "study",
+        study_group = "group",
+        future_city = "city",
+        country = "country",
+        entry_status = hide,
+        usecase_status = hide,
+        scenario_status = hide
+    )
+
 def chat_init():
     '''
     Initialises conversation state
@@ -92,6 +105,9 @@ def survey():
     entry_status = view if current_view == "entry" else hide
     usecase_status = view if current_view == "usecases" else hide
     scenario_status = view if current_view == "scenario" else hide
+
+    """     if request.method == "POST":
+            study = study """
 
     return render_template(
         "index.html",
@@ -160,4 +176,4 @@ def favicon():
     return send_from_directory(app.static_folder, "favicon.ico", mimetype="image/vnd.microsoft.icon")
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    app.run( use_reloader=False) #debug=True,
