@@ -1,14 +1,14 @@
 # Goal Reflection Agent
 
-A LangGraph-powered conversational agent that runs in **ConversationalCare** and on **Streamlit Community Cloud** from the same codebase.
+A LangGraph-powered conversational agent that runs in **ConversationalCare** and on **Vercel?** from the same codebase.
 
 ---
 
 ## Architecture
 
 ```
-app.py                      ← Streamlit entry point
-PromoptBasedAgent.py        ← LangGraph agent 
+app.py                      ← Flask entry point
+PromptBasedAgent.py         ← LangGraph agent 
 prompts/
   agent.prompt    ← System prompt
 requirements.txt
@@ -44,4 +44,4 @@ flask --app app.py --debug run
 |---|---|---|
 | `OPENAI_API_KEY` | ✅ | OpenAI API key |
 | `SUPABASE_URL` | ✅ | Supabase URL |
-| `SUPABASE_KEY` | ✅ | Supabase URL |
+| `SUPABASE_KEY` | ✅ | Supabase KEY |
