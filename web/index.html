@@ -2,7 +2,7 @@
 <html lang="en">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Prompt-Based Agent</title>
+<title>AI Futures</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
 
@@ -78,7 +78,7 @@
         <select>
         {% if communities %}
         {% for item in communities %}
-            <option class="pill" data-value="{{ item.content }}">{{ item.content }}</option>
+            <option class="pill" data-value="{{item}}">{{item}}</option>
         {% endfor %}
         {% endif %}
         <!-- <button class="pill" data-value="Indian">Indian</button>

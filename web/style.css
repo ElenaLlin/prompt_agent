@@ -30,6 +30,10 @@ html {
 select {
   background-color: var(--card);
 }
+option {
+    background-color: var(--card);
+    color: var(--dark)
+}
 
 input {
     background-color: var(--card);

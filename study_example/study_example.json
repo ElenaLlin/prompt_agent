@@ -1,8 +1,7 @@
 {
-  "study" : "example",
+  "header" : "example",
   "future_city": "Example City",
-  "group": "Example communities",
-  "country": "Exampland",
+  "text": "A city for example communities",
   "language_options": [
     "English"
   ],
