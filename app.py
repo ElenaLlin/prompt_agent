@@ -33,10 +33,14 @@ with open(selection_path, "r", encoding="utf-8") as f:
 
 # User id for example
 userId = study_config["user_id_list"][0] # will be inputed by user
-group = study_config["group"]
+header = study_config["header"]
 city = study_config["future_city"]
-country = study_config["country"]
+text = study_config["text"]
 communities = study_config["communities"]
+for key in study_config["usecase_one"]:
+    usecase_one = key
+for key in study_config["usecase_two"]:
+    usecase_two = key
 
 supabase.table("answers").update(selection).eq("user_id",userId).execute()
 
@@ -58,19 +62,6 @@ usecase = userData["usecase"]
 # make machine have first output message - will be generated when a session starts
 hide = "panel hidden"
 view = "panel"
-
-@app.route("/", methods=["GET"])
-def default():
-    return render_template(
-        "index.html",
-        study = "study",
-        study_group = "group",
-        future_city = "city",
-        country = "country",
-        entry_status = hide,
-        usecase_status = hide,
-        scenario_status = hide
-    )
 
 def chat_init():
     '''
@@ -98,6 +89,20 @@ def chat_init():
 
     return thread_id
 
+
+@app.route("/", methods=["GET"])
+def default():
+    return render_template(
+        "index.html",
+        study = "study",
+        header = "header",
+        future_city = "city",
+        text = "text",
+        entry_status = hide,
+        usecase_status = hide,
+        scenario_status = hide
+    )
+
 @app.route(f"/study_{study}", methods=["GET", "POST"])
 def survey():
     current_view = request.args.get("view", "entry")
@@ -106,18 +111,88 @@ def survey():
     usecase_status = view if current_view == "usecases" else hide
     scenario_status = view if current_view == "scenario" else hide
 
-    """     if request.method == "POST":
-            study = study """
+    if request.method == "POST" and current_view == "entry":
+        #supabase.table("answers").update("age":).eq("user_id",userId).execute()
+        return  render_template(
+            "index.html",
+            study = study,
+            header = header,
+            future_city = city,
+            text = text,
+            entry_status = entry_status,
+            usecase_status = usecase_status,
+            scenario_status = scenario_status,
+            communities = communities
+        )
+
+    elif request.method == "POST" and current_view == "usecases":
+        return  render_template(
+                    "index.html",
+                    study = study,
+                    header = header,
+                    future_city = city,
+                    text = text,
+                    entry_status = entry_status,
+                    usecase_status = usecase_status,
+                    scenario_status = scenario_status,
+                    usecase_one = usecase_one,
+                    description_one = study_config["usecase_one"][usecase_one]["description"],
+                    usecase_two = usecase_two,
+                    description_two = study_config["usecase_two"][usecase_two]["description"]
+                )
+
+    elif request.method == "POST" and current_view == "scenario":
+        """ if request.form['self']:"""
+        scenarios = []
+        for key in study_config["usecase_one"][usecase_one]["scenarios"]:
+            scenarios.append(key) 
+        return  render_template(
+                            "index.html",
+                            study = study,
+                            header = header,
+                            future_city = city,
+                            text = text,
+                            entry_status = entry_status,
+                            usecase_status = usecase_status,
+                            scenario_status = scenario_status,
+                            scenario_one = scenarios[0],
+                            description_one = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[0]][2],
+                            scenario_two = scenarios[1],
+                            description_two = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[1]][2],
+                            scenario_three = scenarios[2],
+                            description_three = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[2]][2]
+                        )
+        """ elif request.form['elder']:
+            scenarios = []
+            for key in study_config["usecase_two"]["scenarios"]:
+                scenarios.append(key)
+            return  render_template(
+                "index.html",
+                study = study,
+                header = header,
+                future_city = city,
+                text = text,
+                entry_status = entry_status,
+                usecase_status = usecase_status,
+                scenario_status = scenario_status,
+                scenario_one = scenarios[0],
+                description_one = study_config["usecase_two"]["scenarios"][scenarios[0]][2],
+                scenario_two = scenarios[1],
+                description_two = study_config["usecase_two"]["scenarios"][scenarios[1]][2],
+                scenario_three = scenarios[2],
+                description_three = study_config["usecase_two"]["scenarios"][scenarios[2]][2]
+            ) """
 
     return render_template(
         "index.html",
         study = study,
-        study_group = group,
+        header = header,
         future_city = city,
-        country = country,
+        text = text,
         entry_status = entry_status,
         usecase_status = usecase_status,
-        scenario_status = scenario_status
+        scenario_status = scenario_status,
+        communities = communities
     )
 
 @app.route(f"/study_{study}/chat", methods=["GET", "POST"])
@@ -154,9 +229,9 @@ def chat():
         chat_history=session["chat_history"],
         thread_id=thread_id,
         study = study,
-        study_group = group,
+        header = header,
         future_city = city,
-        country = country,
+        text = text,
         scenario = scenario,
         usecase = usecase,
         communities = communities
