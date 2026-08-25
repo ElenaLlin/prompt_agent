@@ -103,7 +103,7 @@ def default():
         scenario_status = hide
     )
 
-@app.route(f"/study_{study}", methods=["GET", "POST"])
+@app.route(f"/{study}", methods=["GET", "POST"])
 def survey():
     current_view = request.args.get("view", "entry")
 
@@ -142,46 +142,47 @@ def survey():
                 )
 
     elif request.method == "POST" and current_view == "scenario":
-        """ if request.form['self']:"""
-        scenarios = []
-        for key in study_config["usecase_one"][usecase_one]["scenarios"]:
-            scenarios.append(key) 
-        return  render_template(
-                            "index.html",
-                            study = study,
-                            header = header,
-                            future_city = city,
-                            text = text,
-                            entry_status = entry_status,
-                            usecase_status = usecase_status,
-                            scenario_status = scenario_status,
-                            scenario_one = scenarios[0],
-                            description_one = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[0]][2],
-                            scenario_two = scenarios[1],
-                            description_two = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[1]][2],
-                            scenario_three = scenarios[2],
-                            description_three = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[2]][2]
-                        )
-        """ elif request.form['elder']:
-            scenarios = []
-            for key in study_config["usecase_two"]["scenarios"]:
-                scenarios.append(key)
-            return  render_template(
-                "index.html",
-                study = study,
-                header = header,
-                future_city = city,
-                text = text,
-                entry_status = entry_status,
-                usecase_status = usecase_status,
-                scenario_status = scenario_status,
-                scenario_one = scenarios[0],
-                description_one = study_config["usecase_two"]["scenarios"][scenarios[0]][2],
-                scenario_two = scenarios[1],
-                description_two = study_config["usecase_two"]["scenarios"][scenarios[1]][2],
-                scenario_three = scenarios[2],
-                description_three = study_config["usecase_two"]["scenarios"][scenarios[2]][2]
-            ) """
+        for k in request.form:
+            if k == 'self':
+                scenarios = []
+                for k in study_config["usecase_one"][usecase_one]["scenarios"]:
+                    scenarios.append(k)
+                return  render_template(
+                    "index.html",
+                    study = study,
+                    header = header,
+                    future_city = city,
+                    text = text,
+                    entry_status = entry_status,
+                    usecase_status = usecase_status,
+                    scenario_status = scenario_status,
+                    scenario_one = scenarios[0],
+                    description_one = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[0]][2],
+                    scenario_two = scenarios[1],
+                    description_two = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[1]][2],
+                    scenario_three = scenarios[2],
+                    description_three = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[2]][2]
+                )
+            elif k == 'elder':
+                scenarios = []
+                for k in study_config["usecase_two"][usecase_two]["scenarios"]:
+                    scenarios.append(k)
+                return  render_template(
+                    "index.html",
+                    study = study,
+                    header = header,
+                    future_city = city,
+                    text = text,
+                    entry_status = entry_status,
+                    usecase_status = usecase_status,
+                    scenario_status = scenario_status,
+                    scenario_one = scenarios[0],
+                    description_one = study_config["usecase_two"][usecase_two]["scenarios"][scenarios[0]][2],
+                    scenario_two = scenarios[1],
+                    description_two = study_config["usecase_two"][usecase_two]["scenarios"][scenarios[1]][2],
+                    scenario_three = scenarios[2],
+                    description_three = study_config["usecase_two"][usecase_two]["scenarios"][scenarios[2]][2]
+                )
 
     return render_template(
         "index.html",

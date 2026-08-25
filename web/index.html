@@ -58,41 +58,35 @@
         
             <label for="ageInput">Age</label>
             <input id="ageInput" type="number" placeholder="Enter your age" />
-        </div>
 
-        <label>Gender</label>
-        <div class="pill-group">
-        <select id="genderGroup">
-        <option class="pill" data-value="Woman">Woman</option>
-        <option class="pill" data-value="Man">Man</option>
-        <option class="pill" data-value="Non-binary">Non-binary</option>
-        <option class="pill" data-value="Prefer not to say">
-            Prefer not to say 
-        </option>
-        </select>
-        </div>
+            <label>Gender</label>
+            <select class="pill" id="genderGroup">
+                <option data-value="" disabled selected>Select your gender</option>
+                <option data-value="Woman">Woman</option>
+                <option data-value="Man">Man</option>
+                <option data-value="Non-binary">Non-binary</option>
+                <option data-value="Prefer not to say">
+                    Prefer not to say 
+                </option>
+            </select>
 
-        <label>South Asian community</label>
-        <div class="pill-group" id="heritageGroup">
-        <!-- From study.json -->
-        <select>
-        {% if communities %}
-        {% for item in communities %}
-            <option class="pill" data-value="{{item}}">{{item}}</option>
-        {% endfor %}
-        {% endif %}
-        <!-- <button class="pill" data-value="Indian">Indian</button>
-        <button class="pill" data-value="Pakistani">Pakistani</button>
-        <button class="pill" data-value="Bangladeshi">Bangladeshi</button>
-        <button class="pill" data-value="Sri Lankan">Sri Lankan</button>
-        <button class="pill" data-value="Nepali">Nepali</button> -->
-        <!-- Default -->
-        <option class="pill" data-value="Other">Other</option>
-        <option class="pill" data-value="Prefer not to say">
-            Prefer not to say
-        </option>
-        </select>
+            <label>Community</label>
+            <!-- From study.json -->
+            <select class="pill">
+                <option data-value="" disabled selected>Select your community</option>
+            {% if communities %}
+            {% for item in communities %}
+                <option data-value="{{item}}">{{item}}</option>
+            {% endfor %}
+            {% endif %}
+                <!-- Default -->
+                <option data-value="Other">Other</option>
+                <option data-value="Prefer not to say">
+                    Prefer not to say
+                </option>
+            </select>
         </div>
+        <!-- <div class="pill-group" id="heritageGroup"> -->
 
         <button class="primary" id="enterBtn" type="sumbit">
         Start designing {{ future_city }}
@@ -113,10 +107,8 @@
         </p>
     </div>
 
-    <div class="case-grid">
-
-        <form method="post" action="{{ url_for('survey', view='scenario') }}">
-        <button class="case" data-case="self" type="sumbit"> <!-- edit -->
+    <form class="case-grid" method="post" action="{{ url_for('survey', view='scenario') }}">
+        <button class="case" name="self" type="sumbit"> <!-- edit -->
         <img
             src="{{ study }}/usecase-one.jpg"
             alt="Taking care of yourself from diabetes"
@@ -131,7 +123,7 @@
         </div>
         </button>
 
-        <button class="case" data-case="elder" type="sumbit"> <!-- edit -->
+        <button class="case" name="elder" type="sumbit"> <!-- edit -->
         <img
             src="{{ study }}/usecase-two.jpg"
             alt="Supporting an older adult"
@@ -146,9 +138,7 @@
         </div>
         </button>
 
-        </form>
-
-    </div>
+    </form>
     </section>
 
     <!-- SCENARIOS -->
@@ -167,17 +157,16 @@
         <p id="scenarioCopy"></p>
     </div>
 
-    <div class="scenario-grid" id="scenarioGrid">
-        <form method="post" action="{{ url_for('chat') }}">
+    <form class="scenario-grid" id="scenarioGrid" method="post" action="{{ url_for('chat') }}">
         <button class="scenario" data-scenario="one" type="sumbit">
         <img
             src="{{ study }}/scenario-one.jpg"
-            alt="Taking care of yourself from diabetes"
+            alt="{{ scenario_one }}"
         />
 
         <div class="case-body" >
             <span class="tag">Use case one</span>
-            <h3>{{ scenario_two }}</h3>
+            <h3>{{ scenario_one }}</h3>
             <p class="imagine">
             {{ description_one }}
             </p>
@@ -187,7 +176,7 @@
         <button class="scenario" data-scenario="two" type="sumbit">
         <img
             src="{{ study }}/scenario-two.jpg"
-            alt="Supporting an older adult"
+            alt="{{scenario_two}}"
         />
 
         <div class="case-body">
@@ -199,8 +188,22 @@
         </div>
         </button>
 
-        </form>
-    </div>
+        <button class="scenario" data-scenario="three" type="sumbit">
+        <img
+            src="{{ study }}/scenario-three.jpg"
+            alt="{{scenario_three}}"
+        />
+
+        <div class="case-body">
+            <span class="tag">Use case three</span>
+            <h3>{{scenario_three}}</h3>
+            <p class="imagine">
+            {{ description_three }}
+            </p>
+        </div>
+        </button>
+
+    </form>
     </section>
 
     <!-- CONVERSATION -->
