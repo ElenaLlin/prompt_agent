@@ -22,7 +22,7 @@ supabase: Client = create_client(
 # Initialize the agent once when the app starts.
 warmup_agent()
 
-study = "south_asia" # study goes here - how will this be set? home page?
+study = "south_asia" # study goes here - this will be set by home page - edit
 study_path = os.path.join(os.path.dirname(__file__), f"study_{study}/study_{study}.json")
 with open(study_path, "r", encoding="utf-8") as f:
     study_config = json.load(f)
@@ -32,7 +32,7 @@ with open(selection_path, "r", encoding="utf-8") as f:
     selection = json.load(f)
 
 # User id for example
-userId = study_config["user_id_list"][0] # will be inputed by user
+userId = study_config["user_id_list"][0] # will be inputed by user - homepage edit
 header = study_config["header"]
 city = study_config["future_city"]
 text = study_config["text"]
@@ -112,7 +112,6 @@ def survey():
     scenario_status = view if current_view == "scenario" else hide
 
     if request.method == "POST" and current_view == "entry":
-        #supabase.table("answers").update("age":).eq("user_id",userId).execute()
         return  render_template(
             "index.html",
             study = study,
@@ -126,6 +125,18 @@ def survey():
         )
 
     elif request.method == "POST" and current_view == "usecases":
+        name = request.form['name']
+        age = int(request.form['age'])
+        gender = request.form['gender']
+        community = request.form['community']
+
+        supabase.table("answers").update(
+            {"name": name,
+            "Age": age,
+            "Gender": gender,
+            "Community": community}
+        ).eq("user_id",userId).execute()
+
         return  render_template(
                     "index.html",
                     study = study,

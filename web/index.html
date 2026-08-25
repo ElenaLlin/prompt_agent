@@ -54,13 +54,13 @@
         <div class="field-row">
             <!-- edit entry in .py -->
             <label for="nameInput">Your name</label>
-            <input id="nameInput" type="text" placeholder="Enter your name" />
+            <input id="nameInput" type="text" placeholder="Enter your name" name="name"/>
         
             <label for="ageInput">Age</label>
-            <input id="ageInput" type="number" placeholder="Enter your age" />
+            <input id="ageInput" type="number" placeholder="Enter your age" name="age"/>
 
-            <label>Gender</label>
-            <select class="pill" id="genderGroup">
+            <label for="genderGroup">Gender</label>
+            <select class="pill" id="genderGroup" name="gender">
                 <option data-value="" disabled selected>Select your gender</option>
                 <option data-value="Woman">Woman</option>
                 <option data-value="Man">Man</option>
@@ -70,9 +70,9 @@
                 </option>
             </select>
 
-            <label>Community</label>
+            <label for="communityGroup">Community</label>
             <!-- From study.json -->
-            <select class="pill">
+            <select class="pill" id="communityGroup" name="community">
                 <option data-value="" disabled selected>Select your community</option>
             {% if communities %}
             {% for item in communities %}
