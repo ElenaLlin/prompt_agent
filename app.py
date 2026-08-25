@@ -27,12 +27,12 @@ study_path = os.path.join(os.path.dirname(__file__), f"{study}/{study}.json")
 with open(study_path, "r", encoding="utf-8") as f:
     study_config = json.load(f)
 
-selection_path = os.path.join(os.path.dirname(__file__), "choices.json")
+""" selection_path = os.path.join(os.path.dirname(__file__), "choices.json")
 with open(selection_path, "r", encoding="utf-8") as f:
-    selection = json.load(f)
+    selection = json.load(f) """
 
 # User id for example
-userId = study_config["user_id_list"][0] # will be inputed by user - homepage edit
+userId = study_config["user_id_list"][1] # will be inputed by user - homepage edit
 header = study_config["header"]
 city = study_config["future_city"]
 text = study_config["text"]
@@ -42,7 +42,7 @@ for key in study_config["usecase_one"]:
 for key in study_config["usecase_two"]:
     usecase_two = key
 
-supabase.table("answers").update(selection).eq("user_id",userId).execute()
+# supabase.table("answers").update(selection).eq("user_id",userId).execute()
 
 Data = supabase.table('answers').select(
     "user_id",
@@ -153,11 +153,18 @@ def survey():
                 )
 
     elif request.method == "POST" and current_view == "scenario":
+        usecase_choice = ""
         for k in request.form:
-            if k == 'self':
+            if k == 'one':
+                usecase_choice = usecase_one
                 scenarios = []
                 for k in study_config["usecase_one"][usecase_one]["scenarios"]:
                     scenarios.append(k)
+
+                supabase.table("answers").update(
+                    {"usecase": usecase_choice}
+                ).eq("user_id",userId).execute()
+                
                 return  render_template(
                     "index.html",
                     study = study,
@@ -168,16 +175,25 @@ def survey():
                     usecase_status = usecase_status,
                     scenario_status = scenario_status,
                     scenario_one = scenarios[0],
-                    description_one = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[0]][2],
+                    description_one = study_config["usecase_one"][usecase_one]["scenarios"][
+                        scenarios[0]][2],
                     scenario_two = scenarios[1],
-                    description_two = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[1]][2],
+                    description_two = study_config["usecase_one"][usecase_one]["scenarios"][
+                        scenarios[1]][2],
                     scenario_three = scenarios[2],
-                    description_three = study_config["usecase_one"][usecase_one]["scenarios"][scenarios[2]][2]
+                    description_three = study_config["usecase_one"][usecase_one]["scenarios"][
+                        scenarios[2]][2]
                 )
-            elif k == 'elder':
+            elif k == 'two':
+                usecase_choice = usecase_two
                 scenarios = []
                 for k in study_config["usecase_two"][usecase_two]["scenarios"]:
                     scenarios.append(k)
+
+                supabase.table("answers").update(
+                    {"usecase": usecase_choice}
+                ).eq("user_id",userId).execute()
+
                 return  render_template(
                     "index.html",
                     study = study,
@@ -188,11 +204,14 @@ def survey():
                     usecase_status = usecase_status,
                     scenario_status = scenario_status,
                     scenario_one = scenarios[0],
-                    description_one = study_config["usecase_two"][usecase_two]["scenarios"][scenarios[0]][2],
+                    description_one = study_config["usecase_two"][usecase_two]["scenarios"][
+                        scenarios[0]][2],
                     scenario_two = scenarios[1],
-                    description_two = study_config["usecase_two"][usecase_two]["scenarios"][scenarios[1]][2],
+                    description_two = study_config["usecase_two"][usecase_two]["scenarios"][
+                        scenarios[1]][2],
                     scenario_three = scenarios[2],
-                    description_three = study_config["usecase_two"][usecase_two]["scenarios"][scenarios[2]][2]
+                    description_three = study_config["usecase_two"][usecase_two]["scenarios"][
+                        scenarios[2]][2]
                 )
 
     return render_template(
