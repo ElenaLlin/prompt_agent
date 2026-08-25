@@ -54,11 +54,14 @@ Data = supabase.table('answers').select(
     "final"
     ).eq("user_id",userId).execute()
 userData = Data.data[0]
+scenarios = []
 print(userData)
 # make choices the first message from user
 userMessage = userData["usecase"] + '\n' + userData["scenario"]
 scenario = userData["scenario"]
+scenario_choice = ''
 usecase = userData["usecase"]
+usecase_choice = ''
 # make machine have first output message - will be generated when a session starts
 hide = "panel hidden"
 view = "panel"
@@ -153,11 +156,9 @@ def survey():
                 )
 
     elif request.method == "POST" and current_view == "scenario":
-        usecase_choice = ""
         for k in request.form:
             if k == 'one':
                 usecase_choice = usecase_one
-                scenarios = []
                 for k in study_config["usecase_one"][usecase_one]["scenarios"]:
                     scenarios.append(k)
 
@@ -186,7 +187,6 @@ def survey():
                 )
             elif k == 'two':
                 usecase_choice = usecase_two
-                scenarios = []
                 for k in study_config["usecase_two"][usecase_two]["scenarios"]:
                     scenarios.append(k)
 
@@ -226,14 +226,25 @@ def survey():
         communities = communities
     )
 
-@app.route(f"/study_{study}/chat", methods=["GET", "POST"])
+@app.route(f"/{study}/chat", methods=["GET", "POST"])
 def chat():
     """ needs to correspond to html """
 
-    thread_id = chat_init()
-
     # ── Render existing messages ──────────────────────────────────────────────────
     if request.method == "POST":
+        for choice in request.form:
+            if choice == 'one':
+                scenario_choice = scenarios[0]
+            elif choice == 'two':
+                scenario_choice = scenarios[1]
+            elif choice == 'three':
+                scenario_choice = scenarios[2]
+        supabase.table("answers").update(
+            {"scenario": scenario_choice}
+        ).eq("user_id",userId).execute()
+
+        thread_id = chat_init()
+
         # New user input
         message = (request.form.get("message") or "").strip()
         if message:
@@ -263,8 +274,8 @@ def chat():
         header = header,
         future_city = city,
         text = text,
-        scenario = scenario,
-        usecase = usecase,
+        scenario = scenario_choice,
+        usecase = usecase_choice,
         communities = communities
     )
 

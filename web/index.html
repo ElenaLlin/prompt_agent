@@ -158,7 +158,7 @@
     </div>
 
     <form class="scenario-grid" id="scenarioGrid" method="post" action="{{ url_for('chat') }}">
-        <button class="scenario" data-scenario="one" type="sumbit">
+        <button class="scenario" name="one" type="sumbit">
         <img
             src="{{ study }}/scenario-one.jpg"
             alt="{{ scenario_one }}"
@@ -173,7 +173,7 @@
         </div>
         </button>
 
-        <button class="scenario" data-scenario="two" type="sumbit">
+        <button class="scenario" name="two" type="sumbit">
         <img
             src="{{ study }}/scenario-two.jpg"
             alt="{{scenario_two}}"
@@ -188,7 +188,7 @@
         </div>
         </button>
 
-        <button class="scenario" data-scenario="three" type="sumbit">
+        <button class="scenario" name="three" type="sumbit">
         <img
             src="{{ study }}/scenario-three.jpg"
             alt="{{scenario_three}}"
