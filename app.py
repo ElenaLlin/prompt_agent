@@ -37,39 +37,51 @@ header = study_config["header"]
 city = study_config["future_city"]
 text = study_config["text"]
 communities = study_config["communities"]
+default_language = study_config["default_language"][0]
 for key in study_config["usecase_one"]:
     usecase_one = key
 for key in study_config["usecase_two"]:
     usecase_two = key
 
 # supabase.table("answers").update(selection).eq("user_id",userId).execute()
+# add user info into supabase and choices.json - homepage edit
 
-Data = supabase.table('answers').select(
-    "user_id",
-    "agent_language",
-    "usecase",
-    "scenario",
-    "initial",
-    "context",
-    "final"
-    ).eq("user_id",userId).execute()
-userData = Data.data[0]
-scenarios = []
-print(userData)
 # make choices the first message from user
-userMessage = userData["usecase"] + '\n' + userData["scenario"]
-scenario = userData["scenario"]
-scenario_choice = ''
-usecase = userData["usecase"]
 usecase_choice = ''
+scenario_choice = ''
+usecase_questions = {}
+scenarios = []
+userMessage = usecase_choice + '\n' + scenario_choice
+#userMessage = userData["usecase"] + '\n' + userData["scenario"]
+#scenario = userData["scenario"]
+#usecase = userData["usecase"]
+
 # make machine have first output message - will be generated when a session starts
 hide = "panel hidden"
 view = "panel"
+
+def update_choices():
+    data = supabase.table('answers').select(
+        "user_id",
+        "agent_language",
+        "usecase",
+        "scenario",
+        "initial",
+        "context",
+        "final"
+    ).eq("user_id",userId).execute()
+    user_data = data.data[0]
+    selection_path = os.path.join(os.path.dirname(__file__), "choices.json")
+    with open(selection_path, "w", encoding="utf-8") as j:
+        # update json with supabase retrieval
+        json.dump(user_data, j)
+    #print(userData)
 
 def chat_init():
     '''
     Initialises conversation state
     '''
+    update_choices() # inputs into choices.json
     # Ensure session seed exists before generating an initial assistant message
     if "session_seed" not in session:
         session["session_seed"] = str(uuid.uuid4())
@@ -159,6 +171,8 @@ def survey():
         for k in request.form:
             if k == 'one':
                 usecase_choice = usecase_one
+                usecase_questions = study_config["usecase_one"][usecase_one]["questions"]
+                session["usecase_questions"] = usecase_questions
                 for k in study_config["usecase_one"][usecase_one]["scenarios"]:
                     scenarios.append(k)
 
@@ -187,6 +201,9 @@ def survey():
                 )
             elif k == 'two':
                 usecase_choice = usecase_two
+                usecase_questions = study_config["usecase_two"][usecase_two]["questions"]
+                session["usecase_questions"] = usecase_questions
+                print(usecase_questions)
                 for k in study_config["usecase_two"][usecase_two]["scenarios"]:
                     scenarios.append(k)
 
@@ -230,6 +247,9 @@ def survey():
 def chat():
     """ needs to correspond to html """
 
+    usecase_questions = session.get("usecase_questions", {})
+    scenario_choice = session.get("scenario_choice", "")
+
     # ── Render existing messages ──────────────────────────────────────────────────
     if request.method == "POST":
         for choice in request.form:
@@ -239,9 +259,15 @@ def chat():
                 scenario_choice = scenarios[1]
             elif choice == 'three':
                 scenario_choice = scenarios[2]
-        supabase.table("answers").update(
-            {"scenario": scenario_choice}
-        ).eq("user_id",userId).execute()
+        if scenario_choice:
+            session["scenario_choice"] = scenario_choice
+        supabase.table("answers").update({
+            "scenario": scenario_choice,
+            "initial": usecase_questions['initial'],
+            "context": usecase_questions['context'],
+            "final" : usecase_questions['final']
+            }
+        ).eq("user_id",userId).execute() # questions as well
 
         thread_id = chat_init()
 
@@ -274,7 +300,7 @@ def chat():
         header = header,
         future_city = city,
         text = text,
-        scenario = scenario_choice,
+        scenario = session.get("scenario_choice", ""),
         usecase = usecase_choice,
         communities = communities
     )

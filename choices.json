@@ -1,8 +1,1 @@
-{
-    "agent_language": "English",
-    "usecase": "taking care of yourself",
-    "scenario": "Self care: A personal diabetes companion, A tool that helps you understand your health, manage everyday routines, and make choices that work for you., Imagine having a personal companion that quietly helps you manage your diabetes",
-    "initial": "What do you like most about this option for supporting yourself with diabetes?",
-    "context": "How could this idea help you take care of yourself and manage diabetes in everyday life?",
-    "final": "If we decided to build this technology, what would you change or add to make it more useful and comfortable for people living with diabetes?"
-}
+{"user_id": "grain1-heap2", "agent_language": "english", "usecase": "Taking care of our elders", "scenario": "Safety", "initial": "What do you like most about this option for supporting older adults in the city?", "context": "How could this idea help an older adult stay independent, connected, or engaged in everyday life?", "final": "If we decided to build this technology, what would you change or add to make it more useful and comfortable for older adults?"}
