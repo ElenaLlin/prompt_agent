@@ -50,7 +50,7 @@
         </p>
         </div>
        
-        <form method="post" action="{{ url_for('survey', view='usecases')  }}"> 
+        <form method="post" action="{{ url_for('survey', study_id=study, view='usecases') }}">
         <div class="field-row">
             <!-- edit entry in .py -->
             <label for="nameInput">Your name</label>
@@ -107,7 +107,7 @@
         </p>
     </div>
 
-    <form class="case-grid" method="post" action="{{ url_for('survey', view='scenario') }}">
+    <form class="case-grid" method="post" action="{{ url_for('survey', study_id=study, view='scenario') }}">
         <button class="case" name="one" type="sumbit"> <!-- edit -->
         <img
             src="{{ study }}/usecase-one.jpg"
@@ -144,7 +144,7 @@
     <!-- SCENARIOS -->
     <section class={{scenario_status}} id="scenarios">
     
-    <form method="post" action="{{ url_for('survey', view='usecases')  }}"> 
+    <form method="post" action="{{ url_for('survey', study_id=study, view='usecases') }}">
     <div class="back-row">
         <button class="secondary" id="backCases">
         ← Back
@@ -157,7 +157,7 @@
         <p id="scenarioCopy"></p>
     </div>
 
-    <form class="scenario-grid" id="scenarioGrid" method="post" action="{{ url_for('chat') }}">
+    <form class="scenario-grid" id="scenarioGrid" method="post" action="{{ url_for('chat', study_id=study) }}">
         <button class="scenario" name="one" type="sumbit">
         <img
             src="{{ study }}/scenario-one.jpg"

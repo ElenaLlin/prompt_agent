@@ -62,7 +62,7 @@
         {% endif %}
     </div>
 
-    <form method="post" action="{{ url_for('chat') }}" class="composer">
+    <form method="post" action="{{ url_for('chat', study_id=study) }}" class="composer">
         <input
         type="text"
         name="message"
@@ -73,7 +73,7 @@
         <button type="submit">Send</button>
     </form>
 
-    <form method="post" action="{{ url_for('clear_chat') }}" class="clear-chat">
+    <form method="post" action="{{ url_for('clear_chat', study_id=study) }}" class="clear-chat">
         <button type="submit">Reset chat</button>
     </form>
     </section>

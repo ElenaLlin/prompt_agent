@@ -72,6 +72,35 @@ body > footer {
   display: table-row;
 }
 
+.admin-page { background: #f1eee7; color: #20313a; }
+.admin-header { background: #20313a; color: #f8f5ed; padding: clamp(36px, 7vw, 84px) max(6vw, 24px) 42px; text-align: left; }
+.admin-header h1 { margin: 8px 0; font-size: clamp(2.2rem, 5vw, 4.5rem); line-height: 1; }
+.admin-header p { color: #c8d1cc; max-width: 620px; margin: 0; }
+.admin-kicker { color: #e2ae4d; font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.admin-shell { width: min(1080px, 92vw); margin: 0 auto; padding: 28px 0 64px; }
+.admin-form { display: grid; gap: 22px; }
+.admin-section { background: #fffdf8; border-top: 4px solid #e2ae4d; padding: clamp(22px, 4vw, 42px); box-shadow: 0 10px 30px rgba(32,49,58,.06); }
+.section-heading { display: flex; gap: 18px; margin-bottom: 26px; }
+.section-heading > span { color: #bd7b29; font-size: .8rem; font-weight: 800; }
+.section-heading h2 { margin: 0; font-size: 1.55rem; }
+.section-heading p { color: #68737d; margin: 3px 0 0; }
+.admin-grid, .question-grid, .upload-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.question-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 22px 0; }
+.upload-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.admin-grid label, .question-grid label, .upload-grid label { color: #20313a; font-weight: 700; }
+.admin-grid .full-width { grid-column: 1 / -1; }
+.admin-page input, .admin-page textarea { background: #fff; border: 1px solid #d4d0c6; border-radius: 6px; color: #20313a; display: block; font: inherit; margin-top: 7px; padding: 11px 12px; width: 100%; }
+.admin-page textarea { min-height: 86px; resize: vertical; }
+.admin-page small { color: #68737d; font-weight: 400; }
+fieldset { border: 1px solid #d4d0c6; margin: 18px 0 0; padding: 18px; }
+legend { color: #bd7b29; font-weight: 800; padding: 0 8px; }
+.upload-grid input { padding: 10px 0; border: 0; }
+.notice, .created-link { margin-bottom: 18px; padding: 13px 16px; border-left: 4px solid #bd7b29; background: #fffdf8; }
+.notice.error { border-color: #b4523d; }
+.created-link a { color: #bd7b29; font-weight: 800; }
+.admin-submit { background: #bd7b29; border: 0; border-radius: 6px; color: white; cursor: pointer; font: inherit; font-weight: 800; padding: 15px 22px; justify-self: start; }
+@media (max-width: 700px) { .admin-grid, .question-grid, .upload-grid { grid-template-columns: 1fr; } .admin-grid .full-width { grid-column: auto; } }
+
 footer {
   text-align: center;
   color: var(--muted);

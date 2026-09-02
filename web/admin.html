@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create a study | AI Futures</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body class="admin-page">
+  <header class="admin-header">
+    <div class="admin-kicker">Community Design Lab</div>
+    <h1>Create a new study</h1>
+    <p>Set up the participant experience, scenarios, questions, and image assets in one place.</p>
+  </header>
+  <main class="admin-shell">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}<div class="notice {{ category }}">{{ message }}</div>{% endfor %}
+    {% endwith %}
+    {% if created_study %}<div class="created-link">Participant URL: <a href="/{{ created_study }}">/{{ created_study }}</a></div>{% endif %}
+    <form method="post" enctype="multipart/form-data" class="admin-form">
+      <section class="admin-section">
+        <div class="section-heading"><span>01</span><div><h2>Study details</h2><p>These values become the opening page.</p></div></div>
+        <div class="admin-grid">
+          <label>Study ID <input name="study_id" value="{{ form.get('study_id', '') if form else '' }}" placeholder="south_asia_2026" required /></label>
+          <label>Header <input name="header" value="{{ form.get('header', '') if form else '' }}" required /></label>
+          <label>Future city <input name="future_city" required /></label>
+          <label>Languages <textarea name="language_options" required>English</textarea><small>One per line</small></label>
+          <label>User IDs <textarea name="user_id_list" required></textarea><small>One per line</small></label>
+          <label>Communities <textarea name="communities" required></textarea><small>One per line</small></label>
+          <label class="full-width">Intro text <textarea name="text" rows="3" required></textarea></label>
+        </div>
+      </section>
+      {% for usecase_number in (1, 2) %}
+      <section class="admin-section">
+        <div class="section-heading"><span>0{{ usecase_number + 1 }}</span><div><h2>Use case {{ usecase_number }}</h2><p>Give participants a clear choice and three scenarios to explore.</p></div></div>
+        <div class="admin-grid">
+          <label>Title <input name="usecase_{{ usecase_number }}_name" required /></label>
+          <label>Description <textarea name="usecase_{{ usecase_number }}_description" required></textarea></label>
+        </div>
+        <div class="question-grid">
+          {% for question in ('initial', 'context', 'final') %}<label>{{ question|capitalize }} question <textarea name="usecase_{{ usecase_number }}_question_{{ question }}" required></textarea></label>{% endfor %}
+        </div>
+        {% for scenario_number in (1, 2, 3) %}
+        <fieldset><legend>Scenario {{ scenario_number }}</legend><div class="admin-grid">
+          <label>Name <input name="scenario_{{ usecase_number }}_{{ scenario_number }}_name" required /></label>
+          <label>Short description <textarea name="scenario_{{ usecase_number }}_{{ scenario_number }}_short" required></textarea></label>
+          <label>What it does <textarea name="scenario_{{ usecase_number }}_{{ scenario_number }}_detail" required></textarea></label>
+          <label>Imagine sentence <textarea name="scenario_{{ usecase_number }}_{{ scenario_number }}_imagine" required></textarea></label>
+        </div></fieldset>
+        {% endfor %}
+      </section>
+      {% endfor %}
+      <section class="admin-section">
+        <div class="section-heading"><span>04</span><div><h2>Image assets</h2><p>Use JPG, PNG, or WebP images. They will be saved with the names the participant page expects.</p></div></div>
+        <div class="upload-grid">
+          <label>City image<input type="file" name="city_image" accept="image/*" required /></label>
+          <label>Use case 1 image<input type="file" name="usecase_one_image" accept="image/*" required /></label>
+          <label>Use case 2 image<input type="file" name="usecase_two_image" accept="image/*" required /></label>
+          {% for number in (1, 2, 3) %}<label>Scenario {{ number }} image<input type="file" name="scenario_{{ number }}_image" accept="image/*" required /></label>{% endfor %}
+        </div>
+      </section>
+      <button class="admin-submit" type="submit">Create study</button>
+    </form>
+  </main>
+</body>
+</html>
