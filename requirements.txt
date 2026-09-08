@@ -1,8 +1,10 @@
 streamlit
 flask
+flask_babel
 langchain
 langchain-core
 langchain-openai
 langgraph
 python-dotenv
 supabase
+werkzeug

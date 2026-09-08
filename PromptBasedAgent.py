@@ -4,6 +4,7 @@ import datetime
 from langchain_core.messages import AnyMessage
 from langchain_core.runnables import RunnableConfig
 from langchain.agents import create_agent
+from langchain.agents.middleware import dynamic_prompt
 from langchain.agents import AgentState
 
 
@@ -42,7 +43,9 @@ def _load_system_prompt() -> str:
 
     return template
 
-base_system_prompt = _load_system_prompt()   
+@dynamic_prompt
+def current_system_prompt(request) -> str:
+    return _load_system_prompt()
 
 '''
 def prompt(state: AgentState, config: RunnableConfig) -> list[AnyMessage]:  
@@ -53,5 +56,5 @@ def prompt(state: AgentState, config: RunnableConfig) -> list[AnyMessage]:
 graph = create_agent(
     model=f"openai:{OPENAI_MODEL}",
     tools=[get_current_date],
-    system_prompt=base_system_prompt # was prompt now works
+    middleware=[current_system_prompt]
 )

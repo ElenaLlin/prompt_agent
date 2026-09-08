@@ -1,31 +1,46 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ current_language }}">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AI Futures</title>
+<title>{{ _("AI Futures") }}</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
 
 
 <header class="brand">
 <div class="progress" id="progress">
-    Welcome · Community Design Lab
+    {{ _("Community Design Lab") }}
+</div>
+<div class="language-control">
+    <nav>
+        <label for="languageSelect">{{ _("Language") }}</label>
+        <form method="get" action="{{ url_for('survey', study_id=study) }}">
+            {% if request.args.get('view') %}
+            <input type="hidden" name="view" value="{{ request.args.get('view') }}" />
+            {% endif %}
+            <select id="languageSelect" name="lang" onchange="this.form.submit()">
+            {% for code, name in languages.items() %}
+                <option value="{{ code }}" {% if code == current_language %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+            </select>
+        </form>
+    </nav>
 </div>
 </header>
 
 <!-- HERO -->
 <section class="hero">
     <div class="hero-copy">
-        <div class="eyebrow">A city designed with you</div>
+        <div class="eyebrow">{{ _("A city designed with you") }}</div>
 
         <h1>
-        Help us design {{future_city}}.
+        {{ _("Help us design") }} {{future_city}}.
         </h1>
 
         <p class="lede">
-        A city designed around the needs and values of {{study_group}}
-        in the {{counrty}}. You are invited to help imagine what
-        healthcare could become in the future for your community.
+        {{_("A city designed around the needs and values of")}} {{study_group}}
+        {{_("in the")}} {{counrty}}. {{_("You are invited to help imagine what")}}
+        {{_("healthcare could become in the future for your community.")}}
         </p>
     </div>
 
@@ -33,7 +48,7 @@
         <!-- Replace this with your Marigold Cross city image -->
         <img
         src="{{ study }}/city.jpg"
-        alt="Futuristic {{ future_city }} city"
+        alt='{{_("Futuristic city") }}'
         />
     </div>
 </section>
@@ -43,79 +58,78 @@
     <section class={{entry_status}} id="entry">
     <div class="entry-form">
         <div class="center">
-        <h2>Welcome to {{ future_city }}</h2>
+        <h2>{{ _("Welcome to") }} {{ future_city }}</h2>
         <p>
-            Before we begin, tell us a little about yourself.
-            Your responses will help shape the future city.
+            {{ _("Before we begin, tell us a little about yourself.") }}
+            {{ _("Your responses will help shape the future city.") }}
         </p>
         </div>
        
         <form method="post" action="{{ url_for('survey', study_id=study, view='usecases') }}">
         <div class="field-row">
             <!-- edit entry in .py -->
-            <label for="nameInput">Your name</label>
-            <input id="nameInput" type="text" placeholder="Enter your name" name="name"/>
+            <label for="nameInput">{{ _("Your name") }}</label>
+            <input id="nameInput" type="text" placeholder="{{ _('Enter your name') }}" name="name" required data-required-message="{{ _('Please fill out this field.') }}"/>
         
-            <label for="ageInput">Age</label>
-            <input id="ageInput" type="number" placeholder="Enter your age" name="age"/>
+            <label for="ageInput">{{ _("Age") }}</label>
+            <input id="ageInput" type="number" placeholder="{{ _('Enter your age') }}" name="age" required data-required-message="{{ _('Please fill out this field.') }}"/>
 
-            <label for="genderGroup">Gender</label>
-            <select class="pill" id="genderGroup" name="gender">
-                <option data-value="" disabled selected>Select your gender</option>
-                <option data-value="Woman">Woman</option>
-                <option data-value="Man">Man</option>
-                <option data-value="Non-binary">Non-binary</option>
+            <label for="genderGroup">{{ _("Gender") }}</label>
+            <select class="pill" id="genderGroup" name="gender" required data-required-message="{{ _('Please fill out this field.') }}">
+                <option data-value="" disabled selected>{{ _("Select your gender") }}</option>
+                <option data-value="Woman">{{ _("Woman") }}</option>
+                <option data-value="Man">{{ _("Man") }}</option>
+                <option data-value="Non-binary">{{ _("Non-binary") }}</option>
                 <option data-value="Prefer not to say">
-                    Prefer not to say 
+                    {{ _("Prefer not to say") }}
                 </option>
             </select>
 
-            <label for="communityGroup">Community</label>
+            <label for="communityGroup">{{ _("Community") }}</label>
             <!-- From study.json -->
-            <select class="pill" id="communityGroup" name="community">
-                <option data-value="" disabled selected>Select your community</option>
+            <select class="pill" id="communityGroup" name="community" required data-required-message="{{ _('Please fill out this field.') }}">
+                <option data-value="" disabled selected>{{ _("Select your community") }}</option>
             {% if communities %}
             {% for item in communities %}
                 <option data-value="{{item}}">{{item}}</option>
             {% endfor %}
             {% endif %}
                 <!-- Default -->
-                <option data-value="Other">Other</option>
+                <option data-value="Other">{{ _("Other") }}</option>
                 <option data-value="Prefer not to say">
-                    Prefer not to say
+                    {{ _("Prefer not to say") }}
                 </option>
             </select>
         </div>
         <!-- <div class="pill-group" id="heritageGroup"> -->
 
         <button class="primary" id="enterBtn" type="sumbit">
-        Start designing {{ future_city }}
+        {{ _("Start designing") }} {{ future_city }}
         </button>
 
         </form>
-        <div class="status" id="status">Not started</div>
+        <div class="status" id="status">{{ _("Not started") }}</div>
     </div>
     </section>
 
     <!-- USE CASES -->
     <section class={{usecase_status}} id="cases">
     <div class="center">
-        <h2>Choose a use case</h2>
+        <h2>{{ _("Choose a use case") }}</h2>
         <p>
-        Explore different ways healthcare technology could support
-        everyday life in {{ future_city }}.
+        {{ _("Explore different ways healthcare technology could support everyday life in") }} {{ future_city }}.
         </p>
     </div>
 
     <form class="case-grid" method="post" action="{{ url_for('survey', study_id=study, view='scenario') }}">
-        <button class="case" name="one" type="sumbit"> <!-- edit -->
+        <button class="case" name="one" type="sumbit"> 
         <img
             src="{{ study }}/usecase-one.jpg"
-            alt="Taking care of yourself from diabetes"
+            alt='{{ usecase_one }}'
         />
 
         <div class="case-body" >
-            <span class="tag">Use case one</span>
+            <span class="tag">{{ _("Use case one") }}</span>
             <h3>{{ usecase_one }}</h3>
             <p class="imagine">
             {{ description_one }}
@@ -123,14 +137,14 @@
         </div>
         </button>
 
-        <button class="case" name="two" type="sumbit"> <!-- edit -->
+        <button class="case" name="two" type="sumbit">
         <img
             src="{{ study }}/usecase-two.jpg"
-            alt="Supporting an older adult"
+            alt="{{ usecase_two }}"
         />
 
         <div class="case-body">
-            <span class="tag">Use case two</span>
+            <span class="tag">{{ _("Use case two") }}</span>
             <h3>{{ usecase_two }}</h3>
             <p class="imagine">
             {{ description_two }}
@@ -147,7 +161,7 @@
     <form method="post" action="{{ url_for('survey', study_id=study, view='usecases') }}">
     <div class="back-row">
         <button class="secondary" id="backCases">
-        ← Back
+        ← {{ _("Back") }}
         </button>
     </div>
     </form>
@@ -165,7 +179,7 @@
         />
 
         <div class="case-body" >
-            <span class="tag">Use case one</span>
+            <span class="tag">{{ _("Use case one") }}</span>
             <h3>{{ scenario_one }}</h3>
             <p class="imagine">
             {{ description_one }}
@@ -180,7 +194,7 @@
         />
 
         <div class="case-body">
-            <span class="tag">Use case two</span>
+            <span class="tag">{{ _("Use case two") }}</span>
             <h3>{{ scenario_two }}</h3>
             <p class="imagine">
             {{ description_two }}
@@ -195,7 +209,7 @@
         />
 
         <div class="case-body">
-            <span class="tag">Use case three</span>
+            <span class="tag">{{ _("Use case three") }}</span>
             <h3>{{scenario_three}}</h3>
             <p class="imagine">
             {{ description_three }}
@@ -207,50 +221,23 @@
     </section>
 
     <!-- CONVERSATION -->
-    <section class="panel hidden" id="chatSection">
-    <div class="back-row">
-        <button class="secondary" id="backScenarios">
-        ← Back
-        </button>
-    </div>
-
-    <div class="chat">
-
-        <div>
-        <div class="context-image">
-            <img id="contextImg" src="" alt="Selected scenario" />
-        </div>
-
-        <span class="tag" id="chatLens"></span>
-
-        <h2 id="chatTitle"></h2>
-
-        <p id="chosenDesc"></p>
-        </div>
-
-        <div>
-        <div class="chat-log" id="chatLog"></div>
-
-        <div class="chat-input">
-            <textarea
-            id="input"
-            placeholder="Share your thoughts..."
-            rows="2"
-            ></textarea>
-
-            <button class="primary" id="sendBtn">
-            Send
-            </button>
-        </div>
-        </div>
-
-    </div>
-    </section>
 
 </main>
 
 <footer>
-{{ future_city }} · Community Design Lab
+{{ future_city }}
 </footer>
+
+<script>
+    document.querySelectorAll("[required][data-required-message]").forEach((field) => {
+        field.addEventListener("invalid", () => {
+            if (!field.value) {
+                field.setCustomValidity(field.dataset.requiredMessage);
+            }
+        });
+        field.addEventListener("input", () => field.setCustomValidity(""));
+        field.addEventListener("change", () => field.setCustomValidity(""));
+    });
+</script>
 
 </html>

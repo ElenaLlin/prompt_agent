@@ -1,0 +1,322 @@
+# Spanish translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-09-08 23:25+0100\n"
+"PO-Revision-Date: 2026-09-08 16:57+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: web/admin.html:5
+msgid "Create a study"
+msgstr "Crear un estudio"
+
+#: web/admin.html:5 web/index.html:5
+msgid "AI Futures"
+msgstr "Futuros de la IA"
+
+#: web/admin.html:10 web/chat.html:94 web/index.html:12
+msgid "Community Design Lab"
+msgstr "Laboratorio de Diseño Comunitario"
+
+#: web/admin.html:11
+msgid "Create a new study"
+msgstr "Crear un nuevo estudio"
+
+#: web/admin.html:12
+msgid ""
+"Set up the participant experience, scenarios, questions, and image assets"
+" in one place."
+msgstr ""
+"Configura en un solo lugar la experiencia de los participantes, los "
+"escenarios, las preguntas y las imágenes."
+
+#: web/admin.html:21
+msgid "Study details"
+msgstr "Detalles del estudio"
+
+#: web/admin.html:21
+msgid "These values become the opening page."
+msgstr "Estos variable aparecerán en la página de inicio."
+
+#: web/admin.html:23
+msgid "Study ID"
+msgstr "ID del estudio"
+
+#: web/admin.html:24
+msgid "Header"
+msgstr "Encabezado"
+
+#: web/admin.html:25
+msgid "Future city"
+msgstr "Ciudad del futuro"
+
+#: web/admin.html:26
+msgid "Languages"
+msgstr "Idiomas"
+
+#: web/admin.html:26
+msgid "One per line, using two-letter code: Language name"
+msgstr "Una por línea, usando el formato: código de dos letras: nombre del idioma"
+
+#: web/admin.html:27
+msgid "User IDs"
+msgstr "ID de usuarios"
+
+#: web/admin.html:28
+msgid "Communities"
+msgstr "Comunidades"
+
+#: web/admin.html:29
+msgid "Intro text"
+msgstr "Texto introductorio"
+
+#: web/admin.html:34
+msgid "Use case"
+msgstr "Caso de uso"
+
+#: web/admin.html:34
+msgid "Give participants a clear choice and three scenarios to explore."
+msgstr ""
+"Ofrece a los participantes una opción clara y tres escenarios para "
+"explorar."
+
+#: web/admin.html:36
+msgid "Title"
+msgstr "Título"
+
+#: web/admin.html:37
+msgid "Description"
+msgstr "Descripción"
+
+#: web/admin.html:43 web/admin.html:58
+msgid "Scenario"
+msgstr "Escenario"
+
+#: web/admin.html:44
+msgid "Name"
+msgstr "Nombre"
+
+#: web/admin.html:45
+msgid "Short description"
+msgstr "Descripción breve"
+
+#: web/admin.html:46
+msgid "What it does"
+msgstr "Qué hace"
+
+#: web/admin.html:47
+msgid "Imagine sentence"
+msgstr "Frase para imaginar"
+
+#: web/admin.html:53
+msgid "Image assets"
+msgstr "Imágenes"
+
+#: web/admin.html:53
+msgid ""
+"Use JPG, PNG, or WebP images. They will be saved with the names the "
+"participant page expects."
+msgstr ""
+"Usa imágenes JPG, PNG o WebP. Se guardarán con los nombres que espera la "
+"página de participantes."
+
+#: web/admin.html:55
+msgid "City image"
+msgstr "Imagen de la ciudad"
+
+#: web/admin.html:56
+msgid "Use case 1 image"
+msgstr "Imagen del caso de uso 1"
+
+#: web/admin.html:57
+msgid "Use case 2 image"
+msgstr "Imagen del caso de uso 2"
+
+#: web/admin.html:58
+msgid "image"
+msgstr "imagen"
+
+#: web/admin.html:61
+msgid "Create study"
+msgstr "Crear estudio"
+
+#: web/chat.html:5
+msgid "AI Futures Agent"
+msgstr "Agente de Futuros de la IA"
+
+#: web/chat.html:12
+msgid "Welcome · Community Design Lab"
+msgstr "Bienvenido · Laboratorio de Diseño Comunitario"
+
+#: web/chat.html:15 web/index.html:16
+msgid "Language"
+msgstr "Idioma"
+
+#: web/chat.html:29 web/index.html:34
+msgid "A city designed with you"
+msgstr "Una ciudad diseñada contigo"
+
+#: web/chat.html:52
+msgid "AI Futures assistant."
+msgstr "Asistente de Futuros de la IA."
+
+#: web/chat.html:54
+msgid "Thread ID:"
+msgstr "ID del hilo:"
+
+#: web/chat.html:70
+msgid "Start a conversation with your agent."
+msgstr "Inicia una conversación con tu agente."
+
+#: web/chat.html:79
+msgid "Type your message…"
+msgstr "Escribe tu mensaje…"
+
+#: web/chat.html:83
+msgid "Send"
+msgstr "Enviar"
+
+#: web/chat.html:87
+msgid "Reset chat"
+msgstr "Reiniciar chat"
+
+#: web/index.html:37
+msgid "Help us design"
+msgstr "Ayúdanos a diseñar"
+
+#: web/index.html:41
+msgid "A city designed around the needs and values of"
+msgstr "Una ciudad diseñada en torno a las necesidades y los valores de"
+
+#: web/index.html:42
+msgid "in the"
+msgstr "en el"
+
+#: web/index.html:42
+msgid "You are invited to help imagine what"
+msgstr "Te invitamos a imaginar cómo"
+
+#: web/index.html:43
+msgid "healthcare could become in the future for your community."
+msgstr "podría ser la atención médica del futuro para tu comunidad."
+
+#: web/index.html:51
+msgid "Futuristic city"
+msgstr "Ciudad futurista"
+
+#: web/index.html:61
+msgid "Welcome to"
+msgstr "Bienvenido a"
+
+#: web/index.html:63
+msgid "Before we begin, tell us a little about yourself."
+msgstr "Antes de comenzar, cuéntanos un poco sobre ti."
+
+#: web/index.html:64
+msgid "Your responses will help shape the future city."
+msgstr "Tus respuestas ayudarán a dar forma a la ciudad del futuro."
+
+#: web/index.html:71
+msgid "Your name"
+msgstr "Tu nombre"
+
+#: web/index.html:72
+msgid "Enter your name"
+msgstr "Escribe tu nombre"
+
+#: web/index.html:72 web/index.html:75 web/index.html:78 web/index.html:90
+msgid "Please fill out this field."
+msgstr "Por favor, completa este campo."
+
+#: web/index.html:74
+msgid "Age"
+msgstr "Edad"
+
+#: web/index.html:75
+msgid "Enter your age"
+msgstr "Escribe tu edad"
+
+#: web/index.html:77
+msgid "Gender"
+msgstr "Género"
+
+#: web/index.html:79
+msgid "Select your gender"
+msgstr "Selecciona tu género"
+
+#: web/index.html:80
+msgid "Woman"
+msgstr "Mujer"
+
+#: web/index.html:81
+msgid "Man"
+msgstr "Hombre"
+
+#: web/index.html:82
+msgid "Non-binary"
+msgstr "No binario"
+
+#: web/index.html:84 web/index.html:100
+msgid "Prefer not to say"
+msgstr "Prefiero no decirlo"
+
+#: web/index.html:88
+msgid "Community"
+msgstr "Comunidad"
+
+#: web/index.html:91
+msgid "Select your community"
+msgstr "Selecciona tu comunidad"
+
+#: web/index.html:98
+msgid "Other"
+msgstr "Otro"
+
+#: web/index.html:107
+msgid "Start designing"
+msgstr "Comienza a diseñar"
+
+#: web/index.html:111
+msgid "Not started"
+msgstr "No iniciado"
+
+#: web/index.html:118
+msgid "Choose a use case"
+msgstr "Elige un caso de uso"
+
+#: web/index.html:120
+msgid ""
+"Explore different ways healthcare technology could support everyday life "
+"in"
+msgstr ""
+"Explora distintas formas en que la tecnología sanitaria podría apoyar la "
+"vida cotidiana en"
+
+#: web/index.html:132 web/index.html:182
+msgid "Use case one"
+msgstr "Caso de uso uno"
+
+#: web/index.html:147 web/index.html:197
+msgid "Use case two"
+msgstr "Caso de uso dos"
+
+#: web/index.html:164
+msgid "Back"
+msgstr "Atrás"
+
+#: web/index.html:212
+msgid "Use case three"
+msgstr "Caso de uso tres"
+

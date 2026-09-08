@@ -1,7 +1,9 @@
 import os 
 import uuid
 import json
+import hmac
 from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
+from flask_babel import Babel
 from supabase import create_client, Client
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
@@ -14,6 +16,51 @@ app = Flask(__name__, template_folder="web", static_folder="web")
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", os.environ.get(
     "OPENAI_API_KEY", "dev-secret-key"
     ))
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+
+app.config['BABEL_DEFAULT_LOCALE'] = 'en'
+app.config['LANGUAGES'] = {
+    'en': 'English',
+    'es': 'Español',
+}
+
+def _study_languages(config):
+    """Return a locale-code map, accepting old display-name-only configs."""
+    languages = {}
+    for language in config.get("language_options", []):
+        if isinstance(language, dict):
+            code = language.get("code", "").strip().lower()
+            name = language.get("name", "").strip()
+        else:
+            name = str(language).strip()
+            code = {"English": "en", "Spanish": "es", "Español": "es"}.get(name, "")
+        if code and name:
+            languages[code] = name
+    return languages or {"en": "English"}
+
+def _active_languages():
+    study_id = request.view_args.get("study_id") if request.view_args else None
+    if study_id:
+        study_file = os.path.join(os.path.dirname(__file__), study_id, f"{study_id}.json")
+        if os.path.isfile(study_file):
+            with open(study_file, "r", encoding="utf-8") as file:
+                return _study_languages(json.load(file))
+    return app.config["LANGUAGES"]
+
+def get_locale():
+    languages = _active_languages()
+    # 1. If the user picked a language via ?lang=xx, store and use it.
+    requested_language = request.args.get('lang', '').lower()
+    if requested_language in languages:
+        session['lang'] = requested_language
+        return session['lang']
+    # 2. Otherwise reuse their stored choice.
+    if session.get('lang') in languages:
+        return session['lang']
+    # 3. Otherwise fall back to the browser's preferred language.
+    return request.accept_languages.best_match(languages.keys()) or next(iter(languages))
+
+babel = Babel(app, locale_selector=get_locale)
 
 supabase: Client = create_client(
     os.environ.get("SUPABASE_URL"),
@@ -23,29 +70,13 @@ supabase: Client = create_client(
 # Initialize the agent once when the app starts.
 warmup_agent()
 
-study = "south_asia" # study goes here - this will be set by home page - edit
-study_path = os.path.join(os.path.dirname(__file__), f"{study}/{study}.json")
-with open(study_path, "r", encoding="utf-8") as f:
-    study_config = json.load(f)
+#study = "south_asia" # study goes here - this will be set by home page - edit
 
 """ selection_path = os.path.join(os.path.dirname(__file__), "choices.json")
 with open(selection_path, "r", encoding="utf-8") as f:
     selection = json.load(f) """
 
-# User id for example
-userId = study_config["user_id_list"][1] # will be inputed by user - homepage edit
-header = study_config["header"]
-city = study_config["future_city"]
-text = study_config["text"]
-communities = study_config["communities"]
-default_language = study_config["language_options"][0]
-for key in study_config["usecase_one"]:
-    usecase_one = key
-for key in study_config["usecase_two"]:
-    usecase_two = key
-
-# supabase.table("answers").update(selection).eq("user_id",userId).execute()
-# add user info into supabase and choices.json - homepage edit
+# User id for examples is the second entry in the user_id_list of the study config, if available
 
 # make choices the first message from user
 usecase_choice = ''
@@ -61,7 +92,15 @@ userMessage = usecase_choice + '\n' + scenario_choice
 hide = "panel hidden"
 view = "panel"
 
-def update_choices(current_user_id=userId):
+def load_study_config(study_id):
+    study_file = os.path.join(os.path.dirname(__file__), study_id, f"{study_id}.json")
+    if not os.path.isfile(study_file):
+        return None
+    with open(study_file, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+def update_choices(current_user_id, study_id, agent_language=None):
+    # add user info into supabase and choices.json - homepage
     data = supabase.table('answers').select(
         "user_id",
         "agent_language",
@@ -70,29 +109,41 @@ def update_choices(current_user_id=userId):
         "initial",
         "context",
         "final"
-    ).eq("user_id",current_user_id).execute()
+    ).eq("user_id",current_user_id).eq("study", study_id).execute()
     print(data.data)
     user_data = data.data[0] if data.data else {"user_id": current_user_id}
+    if agent_language:
+        user_data["agent_language"] = agent_language
     selection_path = os.path.join(os.path.dirname(__file__), "choices.json")
     with open(selection_path, "w", encoding="utf-8") as j:
         # update json with supabase retrieval
         json.dump(user_data, j)
     #print(userData)
 
-
-def ensure_answer_row(current_user_id):
+def ensure_answer_row(current_user_id, study_id=None):
     """Ensure a study user has a row before update() is used for their answers."""
     existing = supabase.table("answers").select("user_id").eq(
         "user_id", current_user_id
-    ).limit(1).execute()
+    ).eq("study", study_id).limit(1).execute()
     if not existing.data:
-        supabase.table("answers").insert({"user_id": current_user_id}).execute()
+        supabase.table("answers").insert({
+            "user_id": current_user_id,
+            "study": study_id,
+            }).execute()
 
-def chat_init(current_user_id=userId):
+def sync_agent_language(current_user_id, study_id):
+    locale = get_locale()
+    agent_language = _active_languages().get(locale, locale)
+    supabase.table("answers").update(
+        {"agent_language": agent_language}
+    ).eq("user_id", current_user_id).eq("study", study_id).execute()
+    return agent_language
+
+def chat_init(current_user_id, study_id, agent_language=None):
     '''
     Initialises conversation state
     '''
-    update_choices(current_user_id) # inputs into choices.json
+    update_choices(current_user_id, study_id, agent_language) # inputs into choices.json
     # Ensure session seed exists before generating an initial assistant message
     if "session_seed" not in session:
         session["session_seed"] = str(uuid.uuid4())
@@ -115,10 +166,23 @@ def chat_init(current_user_id=userId):
 
     return thread_id
 
-
 def _split_lines(value):
     return [line.strip() for line in value.splitlines() if line.strip()]
 
+def _parse_languages(value):
+    languages = []
+    for line in _split_lines(value):
+        code, separator, name = line.partition(":")
+        code = code.strip().lower()
+        name = name.strip()
+        if not separator or len(code) != 2 or not code.isalpha() or not name:
+            raise ValueError("Languages must use the format 'xx: Language name'.")
+        languages.append({"code": code, "name": name})
+    if not languages:
+        raise ValueError("At least one language is required.")
+    if len({language["code"] for language in languages}) != len(languages):
+        raise ValueError("Language codes must be unique.")
+    return languages
 
 def _study_form_data(form):
     usecases = {}
@@ -146,16 +210,43 @@ def _study_form_data(form):
         "header": form["header"].strip(),
         "future_city": form["future_city"].strip(),
         "text": form["text"].strip(),
-        "language_options": _split_lines(form["language_options"]),
+        "language_options": _parse_languages(form["language_options"]),
         "user_id_list": _split_lines(form["user_id_list"]),
         "communities": _split_lines(form["communities"]),
         "usecase_one": usecases[form["usecase_1_name"]],
         "usecase_two": usecases[form["usecase_2_name"]],
     }
 
+@app.context_processor
+def inject_languages():
+    # Makes `languages` and `current_language` available in every template.
+    return {
+        'languages': _active_languages(),
+        'current_language': get_locale(),
+    }
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET"])
+def consent():
+    return render_template("index.html")
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if not ADMIN_PASSWORD:
+        return "Admin password is not configured.", 503
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        if hmac.compare_digest(password, ADMIN_PASSWORD):
+            session["admin_authenticated"] = True
+            return redirect(url_for("default"))
+        flash("Incorrect password.", "error")
+    return render_template("admin_login.html")
+
+@app.route("/admin", methods=["GET", "POST"])
 def default():
+    if not ADMIN_PASSWORD:
+        return "Admin password is not configured.", 503
+    if not session.get("admin_authenticated"):
+        return redirect(url_for("admin_login"))
     if request.method == "GET":
         return render_template("admin.html")
 
@@ -194,7 +285,11 @@ def default():
 
     study_directory = os.path.join(os.path.dirname(__file__), study_id)
     os.makedirs(study_directory, exist_ok=True)
-    study_config = _study_form_data(request.form)
+    try:
+        study_config = _study_form_data(request.form)
+    except ValueError as error:
+        flash(str(error), "error")
+        return render_template("admin.html", form=request.form), 400
     with open(os.path.join(study_directory, f"{study_id}.json"), "w", encoding="utf-8") as file:
         json.dump(study_config, file, indent=2, ensure_ascii=False)
 
@@ -212,14 +307,11 @@ def default():
     flash(f"Study '{study_id}' was created in the {study_id}/ folder.", "success")
     return render_template("admin.html", created_study=study_id)
 
-@app.route(f"/{study}", defaults={"study_id": study}, methods=["GET", "POST"])
 @app.route("/<study_id>", methods=["GET", "POST"])
 def survey(study_id):
-    study_file = os.path.join(os.path.dirname(__file__), study_id, f"{study_id}.json")
-    if not os.path.isfile(study_file):
+    current_study_config = load_study_config(study_id)
+    if current_study_config is None:
         return "Study not found", 404
-    with open(study_file, "r", encoding="utf-8") as file:
-        current_study_config = json.load(file)
     current_usecase_one = next(iter(current_study_config["usecase_one"]))
     current_usecase_two = next(iter(current_study_config["usecase_two"]))
     current_user_id = current_study_config["user_id_list"][1]
@@ -228,7 +320,8 @@ def survey(study_id):
     current_city = current_study_config["future_city"]
     current_text = current_study_config["text"]
     selected_scenarios = []
-    ensure_answer_row(current_user_id)
+    ensure_answer_row(current_user_id, study_id)
+    sync_agent_language(current_user_id, study_id)
     current_view = request.args.get("view", "entry")
 
     entry_status = view if current_view == "entry" else hide
@@ -259,7 +352,7 @@ def survey(study_id):
             "Age": age,
             "Gender": gender,
             "Community": community}
-        ).eq("user_id",current_user_id).execute()
+        ).eq("user_id",current_user_id).eq("study", study_id).execute()
 
         return  render_template(
                     "index.html",
@@ -288,7 +381,7 @@ def survey(study_id):
 
                 supabase.table("answers").update(
                     {"usecase": usecase_choice}
-                ).eq("user_id",current_user_id).execute()
+                ).eq("user_id",current_user_id).eq("study", study_id).execute()
                 
                 return  render_template(
                     "index.html",
@@ -320,7 +413,7 @@ def survey(study_id):
 
                 supabase.table("answers").update(
                     {"usecase": usecase_choice}
-                ).eq("user_id",current_user_id).execute()
+                ).eq("user_id",current_user_id).eq("study", study_id).execute()
 
                 return  render_template(
                     "index.html",
@@ -358,29 +451,24 @@ def survey(study_id):
         description_two = current_study_config["usecase_two"][current_usecase_two]["description"]
     )
 
-@app.route(f"/{study}/chat", defaults={"study_id": study}, methods=["GET", "POST"])
 @app.route("/<study_id>/chat", methods=["GET", "POST"])
 def chat(study_id):
     """ needs to correspond to html """
 
     usecase_questions = session.get("usecase_questions", {})
     scenario_choice = session.get("scenario_choice", "")
-    current_scenarios = session.get("scenarios", scenarios)
-    current_user_id = userId
-    current_header = header
-    current_city = city
-    current_text = text
-    current_communities = communities
-    study_file = os.path.join(os.path.dirname(__file__), study_id, f"{study_id}.json")
-    if os.path.isfile(study_file):
-        with open(study_file, "r", encoding="utf-8") as file:
-            current_chat_study = json.load(file)
-        current_user_id = current_chat_study["user_id_list"][1]
-        current_header = current_chat_study["header"]
-        current_city = current_chat_study["future_city"]
-        current_text = current_chat_study["text"]
-        current_communities = current_chat_study["communities"]
-    ensure_answer_row(current_user_id)
+    current_scenarios = session.get("scenarios", [])  #scenarios if [] fails
+    current_chat_study = load_study_config(study_id)
+    if current_chat_study is None:
+        return "Study not found", 404
+    current_user_id = current_chat_study["user_id_list"][1]
+    current_header = current_chat_study["header"]
+    current_city = current_chat_study["future_city"]
+    current_text = current_chat_study["text"]
+    current_communities = current_chat_study["communities"]
+    ensure_answer_row(current_user_id, study_id)
+    agent_language = sync_agent_language(current_user_id,study_id)
+    thread_id = chat_init(current_user_id, study_id, agent_language)
 
     # ── Render existing messages ──────────────────────────────────────────────────
     if request.method == "POST":
@@ -399,9 +487,7 @@ def chat(study_id):
             "context": usecase_questions['context'],
             "final" : usecase_questions['final']
             }
-        ).eq("user_id",current_user_id).execute() # questions as well
-
-        thread_id = chat_init(current_user_id)
+        ).eq("user_id",current_user_id).eq("study", study_id).execute() # questions as well
 
         # New user input
         message = (request.form.get("message") or "").strip()
@@ -416,7 +502,7 @@ def chat(study_id):
                 session["responses_summary"] = response_json
                 supabase.table("answers").update(
                     {"chatbot_summary": response_json}
-                    ).eq("user_id", current_user_id).execute()
+                    ).eq("user_id", current_user_id).eq("study", study_id).execute()
             if response_text:
                 display_text = response_text
             else:
@@ -439,11 +525,25 @@ def chat(study_id):
 
 @app.route("/clear", methods=["POST"])
 def clear_chat():
-    chat_init()
+    study_id = request.args.get("study_id", "")
+    current_study_config = load_study_config(study_id)
+    if current_study_config is None:
+        return "Study not found", 404
+    agent_language = sync_agent_language(current_study_config["user_id_list"][1], study_id)
+    chat_init(current_study_config["user_id_list"][1], study_id, agent_language)
     session.pop("chat_history", None)
     session.pop("session_seed", None)
     session.pop("responses_summary", None)
-    return redirect(url_for("chat", study_id=request.args.get("study_id", study)))
+    return redirect(url_for("chat", study_id=study_id))
+
+
+@app.route("/<study_id>/<path:filename>")
+def study_asset(study_id, filename):
+    study_directory = os.path.join(os.path.dirname(__file__), study_id)
+    if not os.path.isfile(os.path.join(study_directory, f"{study_id}.json")):
+        return "Study not found", 404
+    return send_from_directory(study_directory, filename)
+
 
 
 @app.route("/favicon.ico")

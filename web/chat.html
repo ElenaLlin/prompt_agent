@@ -1,22 +1,34 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ current_language }}">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AI Futures Agent</title>
+<title>{{ _("AI Futures Agent") }}</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
 
 
 <header class="brand">
 <div class="progress" id="progress">
-    Welcome · Community Design Lab
+    {{ _("Welcome · Community Design Lab") }}
+</div>
+<div class="language-control">
+    <nav>
+        <label for="languageSelect">{{ _("Language") }}</label>
+        <form method="get" action="{{ url_for('chat', study_id=study) }}">
+            <select id="languageSelect" name="lang" onchange="this.form.submit()">
+            {% for code, name in languages.items() %}
+                <option value="{{ code }}" {% if code == current_language %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+            </select>
+        </form>
+    </nav>
 </div>
 </header>
 
 <!-- HERO -->
 <section class="hero">
     <div class="hero-copy">
-        <div class="eyebrow">A city designed with you</div>
+        <div class="eyebrow">{{ _("A city designed with you") }}</div>
 
         <h1>
         {{header}}
@@ -31,7 +43,7 @@
         <!-- Replace this with your Marigold Cross city image -->
         <img
         src="{{ study }}/city.jpg"
-        alt="Futuristic {{ future_city }} city"
+        alt="{{ future_city }}"
         />
     </div>
 </section>
@@ -39,9 +51,9 @@
 <main class="shell">
 
     <div class="sidebar">
-    <h1>AI Futures assistant.</h1>
+    <h1>{{ _("AI Futures assistant.") }}</h1>
     <p>{{ usecase }}</p>
-    <div class="thread-box">Thread ID: <strong>{{ thread_id }}</strong></div>
+    <div class="thread-box">{{ _("Thread ID:") }} <strong>{{ thread_id }}</strong></div>
     <p> {{ scenario }}</p>
     </div>
 
@@ -57,7 +69,7 @@
         {% endfor %}
         {% else %}
         <div class="empty-state">
-            <p>Start a conversation with your agent.</p>
+            <p>{{ _("Start a conversation with your agent.") }}</p>
         </div>
         {% endif %}
     </div>
@@ -66,22 +78,23 @@
         <input
         type="text"
         name="message"
-        placeholder="Type your message…"
+        placeholder="{{ _('Type your message…') }}"
         autocomplete="off"
         required
         />
-        <button type="submit">Send</button>
+        <button type="submit">{{ _("Send") }}</button>
     </form>
 
+    <!-- 
     <form method="post" action="{{ url_for('clear_chat', study_id=study) }}" class="clear-chat">
-        <button type="submit">Reset chat</button>
-    </form>
+        <button type="submit">{{ _("Reset chat") }}</button>
+    </form> -->
     </section>
- 
+
 </main>
 
 <footer>
-{{ future_city }} · Community Design Lab
+{{ future_city }} · {{ _("Community Design Lab") }}
 </footer>
 
 </html>
