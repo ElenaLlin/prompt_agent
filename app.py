@@ -2,6 +2,7 @@ import os
 import uuid
 import json
 import hmac
+from typing import Any, cast
 from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
 from flask_babel import Babel
 from supabase import create_client, Client
@@ -72,10 +73,6 @@ warmup_agent()
 
 #study = "south_asia" # study goes here - this will be set by home page - edit
 
-""" selection_path = os.path.join(os.path.dirname(__file__), "choices.json")
-with open(selection_path, "r", encoding="utf-8") as f:
-    selection = json.load(f) """
-
 # User id for examples is the second entry in the user_id_list of the study config, if available
 
 # make choices the first message from user
@@ -143,7 +140,7 @@ def study_form_values(study_id, config):
     return values
 
 def update_choices(current_user_id, study_id, agent_language=None):
-    # add user info into supabase and choices.json - homepage
+    # Fetch the current participant data from Supabase for the agent request.
     data = supabase.table('answers').select(
         "user_id",
         "name",
@@ -154,15 +151,14 @@ def update_choices(current_user_id, study_id, agent_language=None):
         "context",
         "final"
     ).eq("user_id",current_user_id).eq("study", study_id).execute()
-    print(data.data)
-    user_data = data.data[0] if data.data else {"user_id": current_user_id}
+    user_data = cast(
+        dict[str, Any],
+        data.data[0] if data.data and isinstance(data.data[0], dict)
+        else {"user_id": current_user_id},
+    )
     if agent_language:
         user_data["agent_language"] = agent_language
-    selection_path = os.path.join(os.path.dirname(__file__), "choices.json")
-    with open(selection_path, "w", encoding="utf-8") as j:
-        # update json with supabase retrieval
-        json.dump(user_data, j)
-    #print(userData)
+    return user_data
 
 def ensure_answer_row(current_user_id, study_id=None):
     """Ensure a study user has a row before update() is used for their answers."""
@@ -187,7 +183,7 @@ def chat_init(current_user_id, study_id, agent_language=None):
     '''
     Initialises conversation state
     '''
-    update_choices(current_user_id, study_id, agent_language) # inputs into choices.json
+    choices = update_choices(current_user_id, study_id, agent_language)
     # Ensure session seed exists before generating an initial assistant message
     if "session_seed" not in session:
         session["session_seed"] = str(uuid.uuid4())
@@ -196,13 +192,13 @@ def chat_init(current_user_id, study_id, agent_language=None):
 
     if "chat_history" not in session:
         # Ask the agent to produce the first message (assistant-initiated)
-        initial_text, initial_json = generate_reply([], thread_id)
+        initial_text, initial_json = generate_reply([], thread_id, choices)
         # If parsed JSON returned, save it in session and show only the thank-you text
         if isinstance(initial_text, str) and initial_text.startswith("⚠️ Error"):
             # Error: fall back to previous behavior
             session["chat_history"] = [{"role": "user", "content": userMessage}]
             history = session["chat_history"]
-            initial_text, initial_json = generate_reply(history, thread_id)
+            initial_text, initial_json = generate_reply(history, thread_id, choices)
         else:
             if initial_json is not None:
                 session["responses_summary"] = initial_json
@@ -623,7 +619,8 @@ def chat(study_id):
             history = session["chat_history"]
             history.append({"role": "user", "content": message})
             # Invoke graph
-            response_text, response_json = generate_reply(history, thread_id)
+            choices = update_choices(current_user_id, study_id, agent_language)
+            response_text, response_json = generate_reply(history, thread_id, choices)
             # If the agent returned structured JSON, store it separately instead of showing raw JSON
             if response_json is not None:
                 session["responses_summary"] = response_json

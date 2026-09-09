@@ -1,6 +1,7 @@
 import os
 import uuid
 import json
+from typing import Any
 from functools import lru_cache
 
 # ── 1. Load configuration before importing the agent ────────────────────────
@@ -73,7 +74,11 @@ def _extract_json_object(text: str):
     return text, None
 
 
-def generate_reply(history: list[dict[str, str]], thread_id: str) -> tuple[str, dict | None]:
+def generate_reply(
+    history: list[dict[str, str]],
+    thread_id: str,
+    choices: dict[str, Any] | None = None,
+) -> tuple[str, dict | None]:
     """Invoke the LangGraph agent and return (text, parsed_json).
 
     If the agent outputs a thank-you marker followed by a JSON object, the JSON
@@ -99,7 +104,11 @@ def generate_reply(history: list[dict[str, str]], thread_id: str) -> tuple[str, 
     }
 
     try:
-        result = graph.invoke({"messages": lc_messages}, config=config)
+        result = graph.invoke(
+            {"messages": lc_messages},
+            config=config,
+            context={"choices": choices or {}},
+        )
         last = result["messages"][-1]
         if hasattr(last, "content"):
             content = str(last.content)
