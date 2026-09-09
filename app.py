@@ -229,6 +229,7 @@ def _parse_languages(value):
     return languages
 
 def _study_form_data(form):
+
     usecases = {}
     for usecase_number in (1, 2):
         scenarios = {}
@@ -390,6 +391,9 @@ def admin():
 
 @app.route("/<study_id>/consent", methods=["GET", "POST"])
 def consent(study_id):
+    if session.get("participant_consent") == study_id:
+        return redirect(url_for("survey", study_id=study_id))
+
     current_study_config = load_study_config(study_id)
     if current_study_config is None:
         return "Study not found", 404
@@ -662,6 +666,17 @@ def clear_chat(study_id):
     session.pop("responses_summary", None)
     return redirect(url_for("chat", study_id=study_id))
 
+@app.route("/<study_id>/clear", methods=['GET','POST'])
+def clear_session(study_id):
+    study_id = session.get('study_id', study_id)
+    current_study_config = load_study_config(study_id)
+    if current_study_config is None:
+        return "Study not found", 404
+    current_user_id = session.get("prolific_id")
+    if not current_user_id or session.get("participant_consent") != study_id:
+        return redirect(url_for("consent", study_id=study_id))
+    session.clear()
+    return redirect(url_for("survey", study_id=study_id))
 
 @app.route("/<study_id>/<path:filename>")
 def study_asset(study_id, filename):

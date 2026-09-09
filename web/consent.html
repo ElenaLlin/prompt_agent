@@ -14,7 +14,7 @@
 <div class="language-control">
     <nav>
         <label for="languageSelect">{{ _("Language") }}</label>
-        <form method="get" action="{{ url_for('survey', study_id=study) }}">
+        <form method="get" action="{{ url_for('consent', study_id=study) }}">
             {% if request.args.get('view') %}
             <input type="hidden" name="view" value="{{ request.args.get('view') }}" />
             {% endif %}
@@ -41,13 +41,28 @@
             <div class="notice {{ category }}">{{ message }}</div>
             {% endfor %}
         {% endwith %}
-        <li>{{ url_for('{{study}}', filename='pis.pdf') }}</li>
+        <div class="pis-viewer">
+            <embed
+                src="{{ url_for('study_asset', study_id=study, filename='pis.pdf') }}"
+                type="application/pdf"
+                aria-label="{{ _('Participant information sheet') }}"
+            />
+            <p>
+                <a href="{{ url_for('study_asset', study_id=study, filename='pis.pdf') }}" target="_blank" rel="noopener">
+                    {{ _("Open the participant information sheet") }}
+                </a>
+            </p>
+        </div>
         <form method="post" action="{{ url_for('consent', study_id=study) }}">
             <label for="prolificId">{{ _("Prolific ID") }}</label>
             <input id="prolificId" name="prolific_id" type="text" autocomplete="off" required />
             <label class="consent-check">
                 <input type="checkbox" name="consent" required />
                 <span>{{ _("I consent to take part in this study and confirm that I am the Prolific participant identified above.") }}</span>
+            </label>
+            <label class="pis-check">
+                <input type="checkbox" name="pis" required />
+                <span>{{ _("I confirm that I have read the participant information sheet and agree to take part in this study.") }}</span>
             </label>
             <button class="primary" type="submit">{{ _("Continue to study") }}</button>
         </form>
