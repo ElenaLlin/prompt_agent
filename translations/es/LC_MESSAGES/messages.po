@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-08 23:25+0100\n"
+"POT-Creation-Date: 2026-09-09 01:19+0100\n"
 "PO-Revision-Date: 2026-09-08 16:57+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -22,11 +22,12 @@ msgstr ""
 msgid "Create a study"
 msgstr "Crear un estudio"
 
-#: web/admin.html:5 web/index.html:5
+#: web/admin.html:5 web/admin_login.html:5 web/consent.html:5 web/index.html:5
 msgid "AI Futures"
 msgstr "Futuros de la IA"
 
-#: web/admin.html:10 web/chat.html:94 web/index.html:12
+#: web/admin.html:10 web/admin_login.html:10 web/chat.html:97
+#: web/consent.html:12 web/index.html:12
 msgid "Community Design Lab"
 msgstr "Laboratorio de Diseño Comunitario"
 
@@ -42,89 +43,109 @@ msgstr ""
 "Configura en un solo lugar la experiencia de los participantes, los "
 "escenarios, las preguntas y las imágenes."
 
-#: web/admin.html:21
+#: web/admin.html:19
+msgid "Available studies"
+msgstr ""
+
+#: web/admin.html:19
+msgid "Open a participant page or edit an existing study."
+msgstr ""
+
+#: web/admin.html:23
+msgid "Open"
+msgstr ""
+
+#: web/admin.html:23
+msgid "Edit"
+msgstr ""
+
+#: web/admin.html:27
+msgid "No studies created yet."
+msgstr ""
+
+#: web/admin.html:34
 msgid "Study details"
 msgstr "Detalles del estudio"
 
-#: web/admin.html:21
+#: web/admin.html:34
 msgid "These values become the opening page."
 msgstr "Estos variable aparecerán en la página de inicio."
 
-#: web/admin.html:23
+#: web/admin.html:36
 msgid "Study ID"
 msgstr "ID del estudio"
 
-#: web/admin.html:24
+#: web/admin.html:37
 msgid "Header"
 msgstr "Encabezado"
 
-#: web/admin.html:25
+#: web/admin.html:38
 msgid "Future city"
 msgstr "Ciudad del futuro"
 
-#: web/admin.html:26
+#: web/admin.html:39
 msgid "Languages"
 msgstr "Idiomas"
 
-#: web/admin.html:26
+#: web/admin.html:39
 msgid "One per line, using two-letter code: Language name"
 msgstr "Una por línea, usando el formato: código de dos letras: nombre del idioma"
 
-#: web/admin.html:27
+#: web/admin.html:40
 msgid "User IDs"
 msgstr "ID de usuarios"
 
-#: web/admin.html:28
+#: web/admin.html:41
 msgid "Communities"
 msgstr "Comunidades"
 
-#: web/admin.html:29
+#: web/admin.html:42
 msgid "Intro text"
 msgstr "Texto introductorio"
 
-#: web/admin.html:34
+#: web/admin.html:47
 msgid "Use case"
 msgstr "Caso de uso"
 
-#: web/admin.html:34
+#: web/admin.html:47
 msgid "Give participants a clear choice and three scenarios to explore."
 msgstr ""
 "Ofrece a los participantes una opción clara y tres escenarios para "
 "explorar."
 
-#: web/admin.html:36
+#: web/admin.html:49
 msgid "Title"
 msgstr "Título"
 
-#: web/admin.html:37
+#: web/admin.html:50
 msgid "Description"
 msgstr "Descripción"
 
-#: web/admin.html:43 web/admin.html:58
+#: web/admin.html:56 web/admin.html:71
 msgid "Scenario"
 msgstr "Escenario"
 
-#: web/admin.html:44
+#: web/admin.html:57
 msgid "Name"
 msgstr "Nombre"
 
-#: web/admin.html:45
+#: web/admin.html:58
 msgid "Short description"
 msgstr "Descripción breve"
 
-#: web/admin.html:46
+#: web/admin.html:59
 msgid "What it does"
 msgstr "Qué hace"
 
-#: web/admin.html:47
+#: web/admin.html:60
 msgid "Imagine sentence"
 msgstr "Frase para imaginar"
 
-#: web/admin.html:53
+#: web/admin.html:66
 msgid "Image assets"
 msgstr "Imágenes"
 
-#: web/admin.html:53
+#: web/admin.html:66
 msgid ""
 "Use JPG, PNG, or WebP images. They will be saved with the names the "
 "participant page expects."
@@ -132,25 +153,46 @@ msgstr ""
 "Usa imágenes JPG, PNG o WebP. Se guardarán con los nombres que espera la "
 "página de participantes."
 
-#: web/admin.html:55
+#: web/admin.html:68
 msgid "City image"
 msgstr "Imagen de la ciudad"
 
-#: web/admin.html:56
+#: web/admin.html:69
 msgid "Use case 1 image"
 msgstr "Imagen del caso de uso 1"
 
-#: web/admin.html:57
+#: web/admin.html:70
 msgid "Use case 2 image"
 msgstr "Imagen del caso de uso 2"
 
-#: web/admin.html:58
+#: web/admin.html:71
 msgid "image"
 msgstr "imagen"
 
-#: web/admin.html:61
+#: web/admin.html:74
+#, fuzzy
+msgid "Update study"
+msgstr "Crear estudio"
+
+#: web/admin.html:74
 msgid "Create study"
 msgstr "Crear estudio"
+
+#: web/admin_login.html:5 web/admin_login.html:11
+msgid "Admin login"
+msgstr ""
+
+#: web/admin_login.html:12
+msgid "Enter the admin password to manage studies."
+msgstr ""
+
+#: web/admin_login.html:20
+msgid "Password"
+msgstr ""
+
+#: web/admin_login.html:23
+msgid "Log in"
+msgstr ""
 
 #: web/chat.html:5
 msgid "AI Futures Agent"
@@ -160,35 +202,35 @@ msgstr "Agente de Futuros de la IA"
 msgid "Welcome · Community Design Lab"
 msgstr "Bienvenido · Laboratorio de Diseño Comunitario"
 
-#: web/chat.html:15 web/index.html:16
+#: web/chat.html:16 web/consent.html:16 web/index.html:16
 msgid "Language"
 msgstr "Idioma"
 
-#: web/chat.html:29 web/index.html:34
+#: web/chat.html:31 web/index.html:34
 msgid "A city designed with you"
 msgstr "Una ciudad diseñada contigo"
 
-#: web/chat.html:52
+#: web/chat.html:54
 msgid "AI Futures assistant."
 msgstr "Asistente de Futuros de la IA."
 
-#: web/chat.html:54
+#: web/chat.html:56
 msgid "Thread ID:"
 msgstr "ID del hilo:"
 
-#: web/chat.html:70
+#: web/chat.html:72
 msgid "Start a conversation with your agent."
 msgstr "Inicia una conversación con tu agente."
 
-#: web/chat.html:79
+#: web/chat.html:81
 msgid "Type your message…"
 msgstr "Escribe tu mensaje…"
 
-#: web/chat.html:83
+#: web/chat.html:85
 msgid "Send"
 msgstr "Enviar"
 
-#: web/chat.html:87
+#: web/chat.html:90
 msgid "Reset chat"
 msgstr "Reiniciar chat"
 

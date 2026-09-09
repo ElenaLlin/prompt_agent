@@ -146,6 +146,7 @@ def update_choices(current_user_id, study_id, agent_language=None):
     # add user info into supabase and choices.json - homepage
     data = supabase.table('answers').select(
         "user_id",
+        "name",
         "agent_language",
         "usecase",
         "scenario",
@@ -269,8 +270,8 @@ def inject_languages():
     }
 
 @app.route("/", methods=["GET"])
-def consent():
-    return render_template("index.html")
+def home():
+    return render_template("home.html")
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
@@ -373,14 +374,53 @@ def admin():
         "admin.html", created_study=study_id, studies=list_studies(),
     )
 
+# consent
+@app.route("/<study_id>/consent", methods=["GET", "POST"])
+def consent(study_id):
+    current_study_config = load_study_config(study_id)
+    if current_study_config is None:
+        return "Study not found", 404
+
+    if request.method == "POST":
+        prolific_id = request.form.get("prolific_id", "").strip()
+        if not prolific_id or request.form.get("consent") != "on":
+            flash("Please enter your Prolific ID and consent to participate.", "error")
+            return render_template("consent.html", study=study_id), 400
+
+        existing = supabase.table("answers").select("user_id").eq(
+            "user_id", prolific_id
+        ).limit(1).execute()
+        if existing.data:
+            flash("This Prolific ID has already been used.", "error")
+            return render_template("consent.html", study=study_id), 409
+
+        supabase.table("answers").insert({
+            "user_id": prolific_id, 
+            "study": study_id,
+            "consent": True
+            }).execute()
+        session["participant_consent"] = study_id
+        session["prolific_id"] = prolific_id
+        return redirect(url_for("survey", study_id=study_id))
+
+    return render_template(
+        "consent.html",
+        study=study_id,
+        study_config=current_study_config)
+
 @app.route("/<study_id>", methods=["GET", "POST"])
 def survey(study_id):
+    if session.get("participant_consent") != study_id:
+        return redirect(url_for("consent", study_id=study_id))
+
     current_study_config = load_study_config(study_id)
     if current_study_config is None:
         return "Study not found", 404
     current_usecase_one = next(iter(current_study_config["usecase_one"]))
     current_usecase_two = next(iter(current_study_config["usecase_two"]))
-    current_user_id = current_study_config["user_id_list"][1]
+    current_user_id = session.get("prolific_id")
+    if not current_user_id:
+        return redirect(url_for("consent", study_id=study_id))
     current_communities = current_study_config["communities"]
     current_header = current_study_config["header"]
     current_city = current_study_config["future_city"]
@@ -527,7 +567,9 @@ def chat(study_id):
     current_chat_study = load_study_config(study_id)
     if current_chat_study is None:
         return "Study not found", 404
-    current_user_id = current_chat_study["user_id_list"][1]
+    current_user_id = session.get("prolific_id")
+    if not current_user_id or session.get("participant_consent") != study_id:
+        return redirect(url_for("consent", study_id=study_id))
     current_header = current_chat_study["header"]
     current_city = current_chat_study["future_city"]
     current_text = current_chat_study["text"]
@@ -535,6 +577,8 @@ def chat(study_id):
     ensure_answer_row(current_user_id, study_id)
     agent_language = sync_agent_language(current_user_id,study_id)
     thread_id = chat_init(current_user_id, study_id, agent_language)
+
+    session['study_id'] = study_id
 
     # ── Render existing messages ──────────────────────────────────────────────────
     if request.method == "POST":
@@ -589,14 +633,17 @@ def chat(study_id):
         communities = current_communities
     )
 
-@app.route("/clear", methods=["POST"])
-def clear_chat():
-    study_id = request.args.get("study_id", "")
+@app.route("/<study_id>/chat/clear", methods=['GET','POST'])
+def clear_chat(study_id):
+    study_id = session.get('study_id', study_id)
     current_study_config = load_study_config(study_id)
     if current_study_config is None:
         return "Study not found", 404
-    agent_language = sync_agent_language(current_study_config["user_id_list"][1], study_id)
-    chat_init(current_study_config["user_id_list"][1], study_id, agent_language)
+    current_user_id = session.get("prolific_id")
+    if not current_user_id or session.get("participant_consent") != study_id:
+        return redirect(url_for("consent", study_id=study_id))
+    agent_language = sync_agent_language(current_user_id, study_id)
+    chat_init(current_user_id, study_id, agent_language)
     session.pop("chat_history", None)
     session.pop("session_seed", None)
     session.pop("responses_summary", None)
