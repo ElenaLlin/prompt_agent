@@ -1,15 +1,18 @@
 {
-  "header" : "example",
+  "header": "example",
   "future_city": "Example City",
   "text": "A city for example communities",
   "language_options": [
-    "English"
+    {
+      "code": "en",
+      "name": "English"
+    }
   ],
-  "user_id_list" : [
+  "user_id_list": [
     "example1-study2",
     "study1-template2"
   ],
-  "communities" : [
+  "communities": [
     "Exa",
     "Mple"
   ],
@@ -23,12 +26,12 @@
           "Imagine sentence"
         ],
         "scenario two": [
-         "What is it - short",
+          "What is it - short",
           "What does it do?",
           "Imagine sentence"
         ],
         "scenario three": [
-         "What is it - short",
+          "What is it - short",
           "What does it do?",
           "Imagine sentence"
         ]
@@ -50,12 +53,12 @@
           "Imagine sentence"
         ],
         "scenario two": [
-         "What is it - short",
+          "What is it - short",
           "What does it do?",
           "Imagine sentence"
         ],
         "scenario three": [
-         "What is it - short",
+          "What is it - short",
           "What does it do?",
           "Imagine sentence"
         ]
@@ -67,5 +70,4 @@
       }
     }
   }
-  
 }

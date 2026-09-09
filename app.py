@@ -99,6 +99,49 @@ def load_study_config(study_id):
     with open(study_file, "r", encoding="utf-8") as file:
         return json.load(file)
 
+def list_studies():
+    studies = []
+    root = os.path.dirname(__file__)
+    for name in sorted(os.listdir(root)):
+        config = load_study_config(name)
+        if config is not None:
+            studies.append({
+                "id": name,
+                "header": config.get("header", name),
+                "url": url_for("survey", study_id=name),
+            })
+    return studies
+
+def study_form_values(study_id, config):
+    values = {
+        "study_id": study_id,
+        "header": config.get("header", ""),
+        "future_city": config.get("future_city", ""),
+        "text": config.get("text", ""),
+        "language_options": "\n".join(
+            f"{language['code']}: {language['name']}"
+            if isinstance(language, dict) else str(language)
+            for language in config.get("language_options", [])
+        ),
+        "user_id_list": "\n".join(config.get("user_id_list", [])),
+        "communities": "\n".join(config.get("communities", [])),
+    }
+    for usecase_number, usecase_key in ((1, "usecase_one"), (2, "usecase_two")):
+        usecase_name = next(iter(config.get(usecase_key, {})), "")
+        usecase = config.get(usecase_key, {}).get(usecase_name, {})
+        values[f"usecase_{usecase_number}_name"] = usecase_name
+        values[f"usecase_{usecase_number}_description"] = usecase.get("description", "")
+        questions = usecase.get("questions", {})
+        for question in ("initial", "context", "final"):
+            values[f"usecase_{usecase_number}_question_{question}"] = questions.get(question, "")
+        scenarios = usecase.get("scenarios", {})
+        for scenario_number, (scenario_name, scenario_values) in enumerate(scenarios.items(), 1):
+            values[f"scenario_{usecase_number}_{scenario_number}_name"] = scenario_name
+            values[f"scenario_{usecase_number}_{scenario_number}_short"] = scenario_values[0]
+            values[f"scenario_{usecase_number}_{scenario_number}_detail"] = scenario_values[1]
+            values[f"scenario_{usecase_number}_{scenario_number}_imagine"] = scenario_values[2]
+    return values
+
 def update_choices(current_user_id, study_id, agent_language=None):
     # add user info into supabase and choices.json - homepage
     data = supabase.table('answers').select(
@@ -237,20 +280,30 @@ def admin_login():
         password = request.form.get("password", "")
         if hmac.compare_digest(password, ADMIN_PASSWORD):
             session["admin_authenticated"] = True
-            return redirect(url_for("default"))
+            return redirect(url_for("admin"))
         flash("Incorrect password.", "error")
     return render_template("admin_login.html")
 
 @app.route("/admin", methods=["GET", "POST"])
-def default():
+def admin():
     if not ADMIN_PASSWORD:
         return "Admin password is not configured.", 503
     if not session.get("admin_authenticated"):
         return redirect(url_for("admin_login"))
     if request.method == "GET":
-        return render_template("admin.html")
+        edit_study_id = secure_filename(request.args.get("edit", "").strip().lower())
+        edit_config = load_study_config(edit_study_id) if edit_study_id else None
+        form = study_form_values(edit_study_id, edit_config) if edit_config else None
+        return render_template(
+            "admin.html",
+            form=form,
+            editing_study=edit_study_id if edit_config else None,
+            studies=list_studies(),
+        )
 
-    study_id = secure_filename(request.form.get("study_id", "").strip().lower())
+    original_study_id = secure_filename(request.form.get("original_study_id", "").strip().lower())
+    study_id = original_study_id or secure_filename(request.form.get("study_id", "").strip().lower())
+    existing_config = load_study_config(study_id)
     if not study_id or not request.form.get("header", "").strip():
         flash("Study ID and header are required.", "error")
         return render_template("admin.html", form=request.form), 400
@@ -277,11 +330,16 @@ def default():
     image_fields = ["city_image", "usecase_one_image", "usecase_two_image"] + [
         f"scenario_{number}_image" for number in (1, 2, 3)
     ]
-    missing_images = [field for field in image_fields if not request.files.get(field)
-                     or not request.files[field].filename]
+    missing_images = [] if existing_config else [
+        field for field in image_fields if not request.files.get(field)
+        or not request.files[field].filename
+    ]
     if missing or missing_images:
         flash("Complete every field and upload all six study images.", "error")
-        return render_template("admin.html", form=request.form), 400
+        return render_template(
+            "admin.html", form=request.form, editing_study=original_study_id or None,
+            studies=list_studies(),
+        ), 400
 
     study_directory = os.path.join(os.path.dirname(__file__), study_id)
     os.makedirs(study_directory, exist_ok=True)
@@ -289,7 +347,10 @@ def default():
         study_config = _study_form_data(request.form)
     except ValueError as error:
         flash(str(error), "error")
-        return render_template("admin.html", form=request.form), 400
+        return render_template(
+            "admin.html", form=request.form, editing_study=original_study_id or None,
+            studies=list_studies(),
+        ), 400
     with open(os.path.join(study_directory, f"{study_id}.json"), "w", encoding="utf-8") as file:
         json.dump(study_config, file, indent=2, ensure_ascii=False)
 
@@ -302,10 +363,15 @@ def default():
         "scenario_3_image": "scenario-three.jpg",
     }
     for field, filename in image_names.items():
-        request.files[field].save(os.path.join(study_directory, filename))
+        uploaded_file = request.files.get(field)
+        if uploaded_file and uploaded_file.filename:
+            uploaded_file.save(os.path.join(study_directory, filename))
 
-    flash(f"Study '{study_id}' was created in the {study_id}/ folder.", "success")
-    return render_template("admin.html", created_study=study_id)
+    action = "updated" if existing_config else "created"
+    flash(f"Study '{study_id}' was {action} in the {study_id}/ folder.", "success")
+    return render_template(
+        "admin.html", created_study=study_id, studies=list_studies(),
+    )
 
 @app.route("/<study_id>", methods=["GET", "POST"])
 def survey(study_id):

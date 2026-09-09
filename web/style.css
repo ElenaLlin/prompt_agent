@@ -100,6 +100,8 @@ body > footer {
 .admin-page small { color: #68737d; font-weight: 400; }
 fieldset { border: 1px solid #d4d0c6; margin: 18px 0 0; padding: 18px; }
 legend { color: #bd7b29; font-weight: 800; padding: 0 8px; }
+li { margin-bottom: 6px; }
+.link { color: #bd7b29; font-weight: 800; text-decoration: none; margin: 4px; padding: 2px 8px; border: #1f2933 1px solid; border-radius: 4px; }
 .upload-grid input { padding: 10px 0; border: 0; }
 .notice, .created-link { margin-bottom: 18px; padding: 13px 16px; border-left: 4px solid #bd7b29; background: #fffdf8; }
 .notice.error { border-color: #b4523d; }

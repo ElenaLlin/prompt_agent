@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="{{ current_language }}">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{ _("Admin login") }} | {{ _("AI Futures") }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+<body class="admin-page">
+  <header class="admin-header">
+    <div class="admin-kicker">{{ _("Community Design Lab") }}</div>
+    <h1>{{ _("Admin login") }}</h1>
+    <p>{{ _("Enter the admin password to manage studies.") }}</p>
+  </header>
+  <main class="admin-shell">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}<div class="notice {{ category }}">{{ message }}</div>{% endfor %}
+    {% endwith %}
+    <form method="post" class="admin-form">
+      <section class="admin-section">
+        <label for="admin-password">{{ _("Password") }}</label>
+        <input id="admin-password" name="password" type="password" autocomplete="current-password" required autofocus />
+      </section>
+      <button class="admin-submit" type="submit">{{ _("Log in") }}</button>
+    </form>
+  </main>
+</body>
+</html>
