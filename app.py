@@ -335,14 +335,25 @@ def admin():
         field for field in image_fields if not request.files.get(field)
         or not request.files[field].filename
     ]
-    if missing or missing_images:
-        flash("Complete every field and upload all six study images.", "error")
+    study_directory = os.path.join(os.path.dirname(__file__), study_id)
+    pis_upload = request.files.get("pis_pdf")
+    has_pis = os.path.isfile(os.path.join(study_directory, "pis.pdf"))
+    missing_pis = (not existing_config or not has_pis) and (
+        not pis_upload or not pis_upload.filename
+    )
+    invalid_pis = pis_upload and pis_upload.filename and not pis_upload.filename.lower().endswith(".pdf")
+    if missing or missing_images or missing_pis or invalid_pis:
+        if missing_pis:
+            flash("Upload the participant information sheet as a PDF.", "error")
+        elif invalid_pis:
+            flash("The participant information sheet must be a PDF.", "error")
+        else:
+            flash("Complete every field and upload all six study images.", "error")
         return render_template(
             "admin.html", form=request.form, editing_study=original_study_id or None,
             studies=list_studies(),
         ), 400
 
-    study_directory = os.path.join(os.path.dirname(__file__), study_id)
     os.makedirs(study_directory, exist_ok=True)
     try:
         study_config = _study_form_data(request.form)
@@ -368,13 +379,15 @@ def admin():
         if uploaded_file and uploaded_file.filename:
             uploaded_file.save(os.path.join(study_directory, filename))
 
+    if pis_upload and pis_upload.filename:
+        pis_upload.save(os.path.join(study_directory, "pis.pdf"))
+
     action = "updated" if existing_config else "created"
     flash(f"Study '{study_id}' was {action} in the {study_id}/ folder.", "success")
     return render_template(
         "admin.html", created_study=study_id, studies=list_studies(),
     )
 
-# consent
 @app.route("/<study_id>/consent", methods=["GET", "POST"])
 def consent(study_id):
     current_study_config = load_study_config(study_id)

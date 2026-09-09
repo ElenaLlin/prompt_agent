@@ -63,12 +63,13 @@
       </section>
       {% endfor %}
       <section class="admin-section">
-        <div class="section-heading"><span>04</span><div><h2>{{ _("Image assets") }}</h2><p>{{ _("Use JPG, PNG, or WebP images. They will be saved with the names the participant page expects.") }}</p></div></div>
+        <div class="section-heading"><span>04</span><div><h2>{{ _("Study assets") }}</h2><p>{{ _("Upload the images (PNG, JPG, WebP) and participant information sheet (PDF) used by the participant page.") }}</p></div></div>
         <div class="upload-grid">
           <label>{{ _("City image") }}<input type="file" name="city_image" accept="image/*" {% if not editing_study %}required{% endif %} /></label>
           <label>{{ _("Use case 1 image") }}<input type="file" name="usecase_one_image" accept="image/*" {% if not editing_study %}required{% endif %} /></label>
           <label>{{ _("Use case 2 image") }}<input type="file" name="usecase_two_image" accept="image/*" {% if not editing_study %}required{% endif %} /></label>
           {% for number in (1, 2, 3) %}<label>{{ _("Scenario") }} {{ number }} {{ _("image") }}<input type="file" name="scenario_{{ number }}_image" accept="image/*" {% if not editing_study %}required{% endif %} /></label>{% endfor %}
+          <label class="full-width">{{ _("Participant information sheet (PDF)") }}<input type="file" name="pis_pdf" accept="application/pdf,.pdf" {% if not editing_study %}required{% endif %} /></label>
         </div>
       </section>
       <button class="admin-submit" type="submit">{{ _("Update study") if editing_study else _("Create study") }}</button>
