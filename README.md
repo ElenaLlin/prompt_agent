@@ -1,6 +1,6 @@
 # Goal Reflection Agent
 
-A LangGraph-powered conversational agent that runs in **ConversationalCare** and on **Vercel?** from the same codebase.
+A LangGraph-powered conversational agent that runs on **Vercel** from the same codebase.
 
 ---
 

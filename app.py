@@ -580,7 +580,7 @@ def chat(study_id):
 
     usecase_questions = session.get("usecase_questions", {})
     scenario_choice = session.get("scenario_choice", "")
-    current_scenarios = session.get("scenarios", [])  #scenarios if [] fails
+    current_scenarios = session.get("scenarios", [])
     current_chat_study = load_study_config(study_id)
     if current_chat_study is None:
         return "Study not found", 404
@@ -632,6 +632,7 @@ def chat(study_id):
                     ).eq("user_id", current_user_id).eq("study", study_id).execute()
             if response_text:
                 display_text = response_text
+                """ return redirect(url_for("clear_session", study_id=study_id)) """
             else:
                 display_text = ""
             history.append({"role": "assistant", "content": display_text})
@@ -646,7 +647,7 @@ def chat(study_id):
         future_city = current_city,
         text = current_text,
         scenario = session.get("scenario_choice", ""),
-        usecase = session.get("usecase_choice", ""),
+        usecase = session.get("usecase_choice", ""), # description = scenario_choice,
         communities = current_communities
     )
 
