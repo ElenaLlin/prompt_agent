@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="{{ current_language }}">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{ study_config.get('header', _('AI Futures')) if study_config else _('AI Futures') }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+
+
+<body >
+<header class="brand">
+<div class="progress" id="progress">
+    {{ _("AI Futures") }}
+</div>
+</header>
+
+<div class="web-viewer">
+    <embed
+        src="https://futures.conversational-care.ai/"
+        type="text/html"
+        aria-label="{{ _('futures webpage') }}"
+    />
+</div>
+
+</body>

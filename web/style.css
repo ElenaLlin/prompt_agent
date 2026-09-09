@@ -81,6 +81,8 @@ body > footer {
 .admin-page { background: #f1eee7; color: #20313a; }
 .consent-shell { width: min(760px, 92vw); margin: 0 auto; padding: 52px 0; }
 .consent-panel h1 { margin-top: 8px; }
+.web-viewer { position: relative; width: 100%; height: calc(100vh - 53px); }
+.web-viewer embed { display: block; height: 100%; width: 100%; }
 .pis-viewer { margin: 24px 0; }
 .pis-viewer embed { display: block; height: min(70vh, 720px); width: 100%; }
 .pis-viewer p { margin: 10px 0 0; }
