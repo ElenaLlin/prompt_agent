@@ -1,8 +1,12 @@
+import logging
 import os
+import re
 import uuid
 import json
 from typing import Any
 from functools import lru_cache
+
+log = logging.getLogger(__name__)
 
 # ── 1. Load configuration before importing the agent ────────────────────────
 
@@ -31,6 +35,10 @@ def warmup_agent() -> None:
     """Initialize the agent once so later requests are faster."""
     graph, AIMessage, HumanMessage = _get_agent_components()
     # add choices to history
+
+
+class AgentUnavailable(RuntimeError):
+    """The language model could not produce a reply (network, quota, filter...)."""
 
 # ── 3. Helpers ────────────────────────────────────────────────────────────────
 
@@ -69,9 +77,20 @@ def _extract_json_object(text: str):
                         parsed = json.loads(text[brace_idx:index + 1])
                     except json.JSONDecodeError:
                         break
-                    return text[:brace_idx].strip(), parsed
-        
+                    # Drop a Markdown code fence opened just before the JSON.
+                    leading = re.sub(r"```(?:json)?\s*$", "", text[:brace_idx].rstrip())
+                    return leading.strip(), parsed
+
     return text, None
+
+
+def _message_text(message) -> str:
+    content = message.content if hasattr(message, "content") else message.get("content", message)
+    if isinstance(content, list):  # content blocks
+        return "".join(
+            part.get("text", "") if isinstance(part, dict) else str(part) for part in content
+        )
+    return str(content)
 
 
 def generate_reply(
@@ -83,6 +102,8 @@ def generate_reply(
 
     If the agent outputs a thank-you marker followed by a JSON object, the JSON
     will be parsed and returned separately. Otherwise parsed_json is None.
+    Raises AgentUnavailable when the model call fails; details go to the log,
+    never to the participant.
     """
 
     graph, AIMessage, HumanMessage = _get_agent_components()
@@ -109,17 +130,15 @@ def generate_reply(
             config=config,
             context={"choices": choices or {}},
         )
-        last = result["messages"][-1]
-        if hasattr(last, "content"):
-            content = str(last.content)
-        else:
-            content = str(last.get("content", last))
-
-        # Completion text may be translated, so detect the JSON object itself.
-        leading, parsed = _extract_json_object(content)
-        if parsed is not None:
-            return leading, parsed
-
-        return content, None
+        content = _message_text(result["messages"][-1]).strip()
     except Exception as exc:
-        return f"⚠️ Error: {exc}", None
+        log.exception("Agent call failed for thread %s", thread_id)
+        raise AgentUnavailable(str(exc)) from exc
+
+    # Completion text may be translated, so detect the JSON object itself.
+    leading, parsed = _extract_json_object(content)
+    if parsed is not None:
+        return leading, parsed
+    if not content:
+        raise AgentUnavailable("The model returned an empty reply")
+    return content, None

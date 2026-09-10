@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="{{ current_language }}">
+{% import "_macros.html" as m with context %}
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{{ study_config.get('header', _('AI Futures')) if study_config else _('AI Futures') }}</title>
@@ -11,21 +12,7 @@
 <div class="progress" id="progress">
     {{ _("Community Design Lab") }}
 </div>
-<div class="language-control">
-    <nav>
-        <label for="languageSelect">{{ _("Language") }}</label>
-        <form method="get" action="{{ url_for('consent', study_id=study) }}">
-            {% if request.args.get('view') %}
-            <input type="hidden" name="view" value="{{ request.args.get('view') }}" />
-            {% endif %}
-            <select id="languageSelect" name="lang" onchange="this.form.submit()">
-            {% for code, name in languages.items() %}
-                <option value="{{ code }}" {% if code == current_language %}selected{% endif %}>{{ name }}</option>
-            {% endfor %}
-            </select>
-        </form>
-    </nav>
-</div>
+{{ m.language_picker(url_for('consent', study_id=study), {'PROLIFIC_PID': request.args.get('PROLIFIC_PID')}) }}
 </header>
 
 <main class="consent-shell">
@@ -36,26 +23,27 @@
         <p class="lede">{{ study_config.get('text', '') }}</p>
         <p>{{ _("Please read the study information before continuing. Your responses will be used for this research study.") }}</p>
         {% endif %}
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, message in messages %}
-            <div class="notice {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endwith %}
+        {{ m.flashes() }}
+        {% set pis_url = study_file_url(study, 'pis.pdf') %}
         <div class="pis-viewer">
+            {% if pis_url %}
             <embed
-                src="{{ url_for('study_asset', study_id=study, filename='pis.pdf') }}"
+                src="{{ pis_url }}"
                 type="application/pdf"
                 aria-label="{{ _('Participant information sheet') }}"
             />
             <p>
-                <a href="{{ url_for('study_asset', study_id=study, filename='pis.pdf') }}" target="_blank" rel="noopener">
+                <a class="secondary pis-link" href="{{ pis_url }}" target="_blank" rel="noopener">
                     {{ _("Open the participant information sheet") }}
                 </a>
             </p>
+            {% else %}
+            <div class="notice error">{{ _("The participant information sheet is not available yet. Please contact the research team.") }}</div>
+            {% endif %}
         </div>
         <form method="post" action="{{ url_for('consent', study_id=study) }}">
             <label for="prolificId">{{ _("Prolific ID") }}</label>
-            <input id="prolificId" name="prolific_id" type="text" autocomplete="off" required />
+            <input id="prolificId" name="prolific_id" type="text" autocomplete="off" maxlength="100" value="{{ prolific_id or '' }}" required />
             <label class="consent-check">
                 <input type="checkbox" name="consent" required />
                 <span>{{ _("I consent to take part in this study and confirm that I am the Prolific participant identified above.") }}</span>
@@ -68,3 +56,4 @@
         </form>
     </section>
 </main>
+</html>

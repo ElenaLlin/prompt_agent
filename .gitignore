@@ -208,3 +208,8 @@ __marimo__/
 
 .vercel
 choices.json
+
+# Docker deployment: persistent data, backups and server-specific Caddy routes
+/data/
+/backups/
+deploy/caddy/conf.d/*.caddy

@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="{{ current_language }}">
+{% import "_macros.html" as m with context %}
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{{ _("Admin login") }} | {{ _("AI Futures") }}</title>
@@ -12,10 +13,9 @@
     <p>{{ _("Enter the admin password to manage studies.") }}</p>
   </header>
   <main class="admin-shell">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for category, message in messages %}<div class="notice {{ category }}">{{ message }}</div>{% endfor %}
-    {% endwith %}
+    {{ m.flashes() }}
     <form method="post" class="admin-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <section class="admin-section">
         <label for="admin-password">{{ _("Password") }}</label>
         <input id="admin-password" name="password" type="password" autocomplete="current-password" required autofocus />
