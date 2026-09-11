@@ -4,6 +4,7 @@ import io
 import json
 import logging
 import os
+import re
 import secrets
 import time
 import uuid
@@ -48,9 +49,12 @@ if not os.environ.get("FLASK_SECRET_KEY"):
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
+# Pages outside a study (home, admin, errors). Each language except English
+# needs a catalogue in translations/, e.g. translations/pt_BR for pt-BR.
 app.config['LANGUAGES'] = {
     'en': 'English',
     'es': 'Español',
+    'pt-BR': 'Português (Brasil)',
 }
 app.config.update(
     MAX_CONTENT_LENGTH=int(os.environ.get("MAX_UPLOAD_MB", "50")) * 1024 * 1024,
@@ -74,18 +78,25 @@ SCENARIO_IMAGES = {"one": "scenario-one.jpg", "two": "scenario-two.jpg", "three"
 GENDER_OPTIONS = ("Woman", "Man", "Non-binary", "Prefer not to say")
 EXTRA_COMMUNITY_OPTIONS = ("Other", "Prefer not to say")
 MAX_MESSAGE_LENGTH = 4000
+# A language ("es") or a language and region ("pt-BR"), see _language_code.
+LANGUAGE_CODE = re.compile(r"[a-z]{2}(-[A-Z]{2})?")
 # Keys of a study config managed by the admin form (others are preserved on edit).
 FORM_CONFIG_KEYS = {
     "header", "future_city", "text", "language_options", "user_id_list",
     "communities", "usecase_one", "usecase_two", "completion_url",
 }
 
+def _language_code(value):
+    """Write a locale code the way HTML expects it: "PT_br" -> "pt-BR", "ES" -> "es"."""
+    language, _sep, region = value.strip().replace("_", "-").partition("-")
+    return f"{language.lower()}-{region.upper()}" if region else language.lower()
+
 def _study_languages(config):
     """Return a locale-code map, accepting old display-name-only configs."""
     languages = {}
     for language in config.get("language_options", []):
         if isinstance(language, dict):
-            code = language.get("code", "").strip().lower()
+            code = _language_code(language.get("code", ""))
             name = language.get("name", "").strip()
         else:
             name = str(language).strip()
@@ -112,7 +123,7 @@ def _active_languages():
 def get_locale():
     languages = _active_languages()
     # 1. If the user picked a language via ?lang=xx, store and use it.
-    requested_language = request.args.get('lang', '').lower()
+    requested_language = _language_code(request.args.get('lang', ''))
     if requested_language in languages:
         session['lang'] = requested_language
         return session['lang']
@@ -122,7 +133,8 @@ def get_locale():
     # 3. Otherwise fall back to the browser's preferred language.
     return request.accept_languages.best_match(languages.keys()) or next(iter(languages))
 
-babel = Babel(app, locale_selector=get_locale)
+# Babel names locales "pt_BR" where HTML and the study configs use "pt-BR".
+babel = Babel(app, locale_selector=lambda: get_locale().replace("-", "_"))
 
 # Create the answers table if needed and initialise the agent once at start-up.
 db.init_db()
@@ -276,10 +288,13 @@ def _parse_languages(value):
     languages = []
     for line in _split_lines(value):
         code, separator, name = line.partition(":")
-        code = code.strip().lower()
+        code = _language_code(code)
         name = name.strip()
-        if not separator or len(code) != 2 or not code.isalpha() or not name:
-            raise ValueError(_("Languages must use the format 'xx: Language name'."))
+        if not separator or not LANGUAGE_CODE.fullmatch(code) or not name:
+            raise ValueError(_(
+                "Languages must use the format 'code: Language name', "
+                "e.g. 'es: Español' or 'pt-BR: Português (Brasil)'."
+            ))
         languages.append({"code": code, "name": name})
     if not languages:
         raise ValueError(_("At least one language is required."))

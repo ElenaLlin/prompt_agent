@@ -94,7 +94,8 @@ conversation cannot be continued or restarted.
 If a study offers more than one language, a **Language** selector appears at
 the top left:
 
-- The page texts switch language (Spanish translations are included).
+- The page texts switch language (Spanish and Brazilian Portuguese
+  translations are included).
 - The AI assistant replies in the selected language.
 - The study's own texts (use cases, ideas, questions) are shown as they were
   entered.
@@ -141,7 +142,7 @@ says *(optional)*.
 |---|---|
 | **Study ID** | Becomes the link, e.g. `south_asia` → `/south_asia`. Lowercase letters, numbers, `-` and `_`. Cannot be changed later; `admin` and `app` are reserved. |
 | **Header**, **Future city**, **Intro text** | Shown at the top of the participant pages. |
-| **Languages** | One per line as `code: Name`, e.g. `en: English`, `es: Español`. The first one is the default. Interface translations exist for English and Spanish; the assistant can speak any language. |
+| **Languages** | One per line as `code: Name`, e.g. `en: English`, `es: Español`, `pt-BR: Português (Brasil)`. Participants get their browser's language if it is listed, otherwise the first one. Interface translations exist for English, Spanish and Brazilian Portuguese (use `pt-BR`, not `pt`); the assistant can speak any language. |
 | **User IDs** | Stored with the study, but not used by the app yet. |
 | **Communities** | One per line; the options in the *Community* drop-down. |
 | **Completion URL** *(optional)* | Shown as the **Finish and return to Prolific** button at the end, e.g. `https://app.prolific.com/submissions/complete?cc=XXXXXXX`. |

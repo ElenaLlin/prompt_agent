@@ -4,7 +4,7 @@
   "text": "Hello",
   "language_options": [
     {"code": "es", "name": "Español"},
-    {"code": "pt", "name": "Português"},
+    {"code": "pt-BR", "name": "Português (Brasil)"},
     {"code": "en", "name": "English"}
   ],
   "user_id_list": [

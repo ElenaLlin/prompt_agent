@@ -3,11 +3,15 @@ import json
 import pathlib
 import uuid
 
+import pytest
+from babel.messages.extract import extract_from_file
+from babel.messages.pofile import read_po
 from PIL import Image
 
 from backend import studies
 from backend.agent_service import _extract_json_object
 
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 STUDY = "south_asia"
 
 
@@ -333,3 +337,100 @@ def test_admin_responses_export_and_delete(client, fake_llm, db):
     assert db.get_answer(pid, STUDY) is None
     # The Prolific ID can be used again after the test response is deleted.
     start_participant(client.application.test_client(), pid=pid)
+
+
+def test_admin_accepts_language_codes_with_a_region(client):
+    token = admin_login(client)
+    form = study_form("brasil", language_options="en: English\npt_br: Português (Brasil)")
+    data = {**form, **all_uploads(), "csrf_token": token}
+    assert client.post("/admin", data=data, content_type="multipart/form-data").status_code == 302
+    languages = studies.load_study_config("brasil")["language_options"]
+    assert languages[1] == {"code": "pt-BR", "name": "Português (Brasil)"}
+    for bad in ("portuguese: Português", "pt-BRA: Português", "pt"):
+        data = {**study_form("badlanguage", language_options=bad), **all_uploads(), "csrf_token": token}
+        assert client.post("/admin", data=data, content_type="multipart/form-data").status_code == 400, bad
+
+
+# ── Languages ───────────────────────────────────────────────────────────────
+
+# The consent page heading in each interface language.
+CONSENT_HEADINGS = {
+    "en": "Participation information",
+    "es": "Información sobre la participación",
+    "pt-BR": "Informações sobre a participação",
+}
+
+
+@pytest.fixture
+def trilingual():
+    """The south_asia study, offered in English, Spanish and Brazilian Portuguese."""
+    config = studies.load_study_config(STUDY)
+    config["language_options"] = [
+        {"code": "en", "name": "English"},
+        {"code": "es", "name": "Español"},
+        {"code": "pt-BR", "name": "Português (Brasil)"},
+    ]
+    studies.save_study("trilingual", config, {})
+    return "trilingual"
+
+
+def test_each_interface_language_is_served(client, trilingual):
+    for code, heading in CONSENT_HEADINGS.items():
+        page = client.get(f"/{trilingual}/consent?lang={code}").get_data(as_text=True)
+        assert heading in page, code
+        assert f'<html lang="{code}">' in page
+
+
+def test_language_choice_is_normalised_and_remembered(client, trilingual):
+    client.get(f"/{trilingual}/consent?lang=pt_br")
+    page = client.get(f"/{trilingual}/consent").get_data(as_text=True)
+    assert CONSENT_HEADINGS["pt-BR"] in page
+    assert '<html lang="pt-BR">' in page
+
+
+def test_browser_language_picks_the_interface_language(app, trilingual):
+    cases = {"pt-BR,pt;q=0.9": "pt-BR", "pt": "pt-BR", "es-AR,es;q=0.9": "es", "fr": "en"}
+    for header, code in cases.items():
+        page = app.test_client().get(f"/{trilingual}/consent", headers={"Accept-Language": header})
+        assert CONSENT_HEADINGS[code] in page.get_data(as_text=True), header
+
+
+def test_pages_outside_a_study_are_translated(client):
+    page = client.get("/admin/login?lang=pt-BR").get_data(as_text=True)
+    assert "Acesso de administração" in page
+    assert '<html lang="pt-BR">' in page
+
+
+def test_participant_flow_in_brazilian_portuguese(client, fake_llm, db, trilingual):
+    pid = start_participant(client, study=trilingual)
+    entry = client.get(f"/{trilingual}?lang=pt-BR").get_data(as_text=True)
+    assert "conte-nos um pouco sobre você" in entry
+    assert fill_entry(client, study=trilingual).status_code == 302
+    usecases = client.get(f"/{trilingual}?view=usecases").get_data(as_text=True)
+    assert "Escolha um caso de uso" in usecases
+    assert client.post(f"/{trilingual}?view=scenario", data={"one": ""}).status_code == 302
+    assert client.post(f"/{trilingual}/chat", data={"one": ""}).status_code == 302
+    chat = client.get(f"/{trilingual}/chat").get_data(as_text=True)
+    assert "Digite sua mensagem…" in chat
+    # The assistant is told which language to speak.
+    assert fake_llm.calls[0]["choices"]["agent_language"] == "Português (Brasil)"
+    assert db.get_answer(pid, trilingual)["agent_language"] == "Português (Brasil)"
+
+
+def _source_messages():
+    """Every text marked for translation in app.py and the templates."""
+    found = extract_from_file("python", ROOT / "app.py")
+    for template in sorted((ROOT / "web").glob("*.html")):
+        found += extract_from_file("jinja2.ext:babel_extract", template)
+    return {message for _line, message, _comments, _context in found}
+
+
+def test_every_interface_text_is_translated():
+    source = _source_messages()
+    assert CONSENT_HEADINGS["en"] in source
+    for locale in ("es", "pt_BR"):
+        with (ROOT / "translations" / locale / "LC_MESSAGES" / "messages.po").open("rb") as file:
+            catalog = read_po(file)
+        translated = {message.id for message in catalog if message.string and not message.fuzzy}
+        assert not source - translated, (locale, sorted(source - translated))
+        assert not list(catalog.check()), locale  # e.g. a missing %(name)s placeholder

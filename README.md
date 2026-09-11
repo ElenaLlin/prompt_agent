@@ -21,7 +21,7 @@ backend/
 prompts/
   agent.prompt              ← System prompt
 web/                        ← Jinja templates, CSS
-translations/               ← Babel catalogues (Spanish)
+translations/               ← Babel catalogues (Spanish, Brazilian Portuguese)
 south_asia/                 ← bundled study (seeded into the data folder)
 Dockerfile, docker-compose.yml, deploy/caddy/  ← production stack
 tests/                      ← pytest suite (scripts/test.sh)
@@ -86,27 +86,34 @@ with a `503` response if the variable is missing.
 
 ## Study languages
 
-When creating a study, enter one language per line using an ISO two-letter
-locale code followed by the display name, for example:
+The interface is available in English (`en`), Spanish (`es`) and Brazilian
+Portuguese (`pt-BR`). When creating a study, enter one language per line as a
+two-letter code, optionally with a region, followed by the display name:
 
 ```text
 en: English
 es: Español
-pt: Português
+pt-BR: Português (Brasil)
 ```
 
 The participant page builds its language selector from the active study's
-`language_options`. A matching Babel catalog must exist under
-`translations/<code>/LC_MESSAGES/` for translated interface text; without one,
-the interface falls back to the original message text. The study texts
-themselves (use cases, scenarios, questions) are shown as entered; the AI
-assistant replies in the selected language.
+`language_options`. Participants get their browser's language if the study
+offers it, otherwise the first one. Translated interface text needs a Babel
+catalogue under `translations/<code>/LC_MESSAGES/`, written with an underscore
+(`translations/pt_BR/` for `pt-BR`); without one, the interface falls back to
+English. Use `pt-BR`, not `pt`: a plain `pt` does not pick up the Brazilian
+catalogue. The study texts themselves (use cases, scenarios, questions) are
+shown as entered; the AI assistant replies in the selected language.
 
-After changing texts in the templates, update the catalogue:
+After changing texts in `app.py` or the templates, update the catalogues:
 
 ```bash
 pybabel extract -F babel.cfg -o messages.pot .
 pybabel update -i messages.pot -d translations
-# translate the new entries in translations/<code>/LC_MESSAGES/messages.po
+# translate the new entries in every translations/<code>/LC_MESSAGES/messages.po
 pybabel compile -d translations
 ```
+
+The test suite fails if a text has no translation in the `es` or `pt_BR`
+catalogue. Both catalogues were machine-written; have a native speaker review
+them before running a study in that language.

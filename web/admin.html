@@ -48,7 +48,7 @@
           <label>{{ _("Study ID") }} <input name="study_id" value="{{ form.get('study_id', '') if form else '' }}" placeholder="south_asia_2026" pattern="[A-Za-z0-9][A-Za-z0-9_\-]*" {% if editing_study %}readonly{% endif %} required /><small>{{ _("Becomes the study link, e.g. /south_asia. Lowercase letters, numbers, - and _.") }}</small></label>
           <label>{{ _("Header") }} <input name="header" value="{{ form.get('header', '') if form else '' }}" required /></label>
           <label>{{ _("Future city") }} <input name="future_city" value="{{ form.get('future_city', '') if form else '' }}" required /></label>
-          <label>{{ _("Languages") }} <textarea name="language_options" required>{{ form.get('language_options', 'en: English') if form else 'en: English' }}</textarea><small>{{ _("One per line, using two-letter code: Language name") }}</small></label>
+          <label>{{ _("Languages") }} <textarea name="language_options" required>{{ form.get('language_options', 'en: English') if form else 'en: English' }}</textarea><small>{{ _("One per line as code: Language name, e.g. es: Español or pt-BR: Português (Brasil).") }}</small></label>
           <label>{{ _("User IDs") }} <textarea name="user_id_list" required>{{ form.get('user_id_list', '') if form else '' }}</textarea><small>{{ _("One per line") }}</small></label>
           <label>{{ _("Communities") }} <textarea name="communities" required>{{ form.get('communities', '') if form else '' }}</textarea><small>{{ _("One per line") }}</small></label>
           <label class="full-width">{{ _("Intro text") }} <textarea name="text" rows="3" required>{{ form.get('text', '') if form else '' }}</textarea></label>
@@ -63,7 +63,7 @@
           <label>{{ _("Description") }} <textarea name="usecase_{{ usecase_number }}_description" required>{{ form.get('usecase_' ~ usecase_number ~ '_description', '') if form else '' }}</textarea></label>
         </div>
         <div class="question-grid">
-          {% for question in ('initial', 'context', 'final') %}<label>{{ question|capitalize }} question <textarea name="usecase_{{ usecase_number }}_question_{{ question }}" required>{{ form.get('usecase_' ~ usecase_number ~ '_question_' ~ question, '') if form else '' }}</textarea></label>{% endfor %}
+          {% for question, label in (('initial', _("Initial question")), ('context', _("Context question")), ('final', _("Final question"))) %}<label>{{ label }} <textarea name="usecase_{{ usecase_number }}_question_{{ question }}" required>{{ form.get('usecase_' ~ usecase_number ~ '_question_' ~ question, '') if form else '' }}</textarea></label>{% endfor %}
         </div>
         {% for scenario_number in (1, 2, 3) %}
         <fieldset><legend>{{ _("Scenario") }} {{ scenario_number }}</legend><div class="admin-grid">
@@ -81,7 +81,7 @@
           <label>{{ _("City image") }}<input type="file" name="city_image" accept="image/*" {% if not editing_study %}required{% endif %} /></label>
           <label>{{ _("Use case 1 image") }}<input type="file" name="usecase_one_image" accept="image/*" {% if not editing_study %}required{% endif %} /></label>
           <label>{{ _("Use case 2 image") }}<input type="file" name="usecase_two_image" accept="image/*" {% if not editing_study %}required{% endif %} /></label>
-          {% for number in (1, 2, 3) %}<label>{{ _("Scenario") }} {{ number }} {{ _("image") }}<input type="file" name="scenario_{{ number }}_image" accept="image/*" {% if not editing_study %}required{% endif %} /></label>{% endfor %}
+          {% for number in (1, 2, 3) %}<label>{{ _("Scenario %(number)s image", number=number) }}<input type="file" name="scenario_{{ number }}_image" accept="image/*" {% if not editing_study %}required{% endif %} /></label>{% endfor %}
           <label class="full-width">{{ _("Participant information sheet (PDF)") }}<input type="file" name="pis_pdf" accept="application/pdf,.pdf" {% if not editing_study %}required{% endif %} /></label>
         </div>
       </section>
